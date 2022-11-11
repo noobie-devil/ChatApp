@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "72556833256",
+    "project_id": "chat-app-776d9",
+    "storage_bucket": "chat-app-776d9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72556833256:android:0ab81e8b776a9fe327dc5d",
+        "android_client_info": {
+          "package_name": "com.zileanstdio.chatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "72556833256-a13vt0dpb1inn2cf733iukjjpgqasuse.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zileanstdio.chatapp",
+            "certificate_hash": "24ca42d98bf99cacbe80ba5d6af8ffb0af9344db"
+          }
+        },
+        {
+          "client_id": "72556833256-fk3j15uf6k5usev8aq2icvc2mtbalq7q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkmNSXZ4L6Lr7Qztlx3wloGQtykgoN9lk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72556833256-fk3j15uf6k5usev8aq2icvc2mtbalq7q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
