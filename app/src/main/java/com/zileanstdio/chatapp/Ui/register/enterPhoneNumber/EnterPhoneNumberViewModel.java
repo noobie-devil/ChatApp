@@ -1,11 +1,9 @@
 package com.zileanstdio.chatapp.Ui.register.enterPhoneNumber;
 
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
 import com.zileanstdio.chatapp.Utils.StateResource;
 
@@ -20,12 +18,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class EnterPhoneNumberViewModel extends ViewModel {
     public static final String TAG = "EnterPhoneNumberViewModel";
-    private AuthRepository authRepository;
-    private MediatorLiveData<StateResource> onCheckExistedPhoneNumber = new MediatorLiveData<>();
-    private CompositeDisposable disposable = new CompositeDisposable();
+    private final AuthRepository authRepository;
+    private final MediatorLiveData<StateResource> onCheckExistedPhoneNumber = new MediatorLiveData<>();
+    private final CompositeDisposable disposable = new CompositeDisposable();
 
-    public EnterPhoneNumberViewModel() {
-    }
 
     @Inject
     public EnterPhoneNumberViewModel(AuthRepository authRepository) {

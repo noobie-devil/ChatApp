@@ -9,6 +9,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-
+        android:background="?attr/colorOnSecondary"
+        app:navigationIconTint="?attr/colorOnSecondaryContainer"
+        app:titleTextColor="?attr/colorOnSecondaryContainer"
+        app:titleTextAppearance="?attr/textAppearanceTitleMedium"
         />
 </com.google.android.material.appbar.AppBarLayout>

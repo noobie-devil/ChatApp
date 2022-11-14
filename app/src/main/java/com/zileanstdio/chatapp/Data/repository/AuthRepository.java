@@ -2,11 +2,17 @@ package com.zileanstdio.chatapp.Data.repository;
 
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.firebase.auth.AuthCredential;
+
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.DataSource.remote.FirebaseAuthSource;
 
+
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 
 public class AuthRepository {
     FirebaseAuthSource firebaseAuthSource;
@@ -25,5 +31,16 @@ public class AuthRepository {
 
     public Completable signInWithPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential) {
         return this.firebaseAuthSource.signInWithPhoneAuthCredential(phoneAuthCredential);
+    }
+
+    public Completable linkWithPhoneAuthProvider(PhoneAuthCredential phoneAuthCredential, FirebaseUser firebaseUser) {
+        return this.firebaseAuthSource.linkWithPhoneAuthProvider(phoneAuthCredential, firebaseUser);
+    }
+
+    public Observable<FirebaseUser> createWithEmailPasswordAuthCredential(String email, String password) {
+        return this.firebaseAuthSource.createWithEmailPasswordAuthCredential(email, password);
+    }
+    public Completable updateRegisterInfo(User user) {
+        return this.firebaseAuthSource.updateRegisterInfo(user);
     }
 }

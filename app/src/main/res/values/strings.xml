@@ -1,11 +1,10 @@
 <resources>
-    <string name="app_name">Chat app</string>
+    <string name="app_name">Zimess</string>
     <string name="messages">Tin nhắn</string>
     <string name="contacts">Danh bạ</string>
     <string name="profile">Cá nhân</string>
     <string name="search_text">Tìm kiếm</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="login_text">Đăng nhập</string>
     <string name="register_text">Đăng ký</string>
     <string name="create_account_text">Tạo tài khoản</string>
@@ -26,4 +25,14 @@
     <string name="Contact_In_Device">Danh bạ máy</string>
     <string name="friend_request">Lời mời kết bạn</string>
     <string name="recent_message_type_record">[Tin nhắn thoại]</string>
+    <string name="genderAndBirthDate">Ngày sinh và giới tính</string>
+    <string name="weak_password_exception_message">Mật khẩu của bạn quá yếu</string>
+    <string name="has_error">Đã xảy ra lỗi. Vui lòng thử lại sau!</string>
+    <string name="ask_permission">This app needs you to allow this permission in order to function. If you allow it, please click SETTINGS to Manually set permission for this action</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="chat_app_icon">Chat App Icon</string>
+    <string name="v_amp_t_version_1_0"><![CDATA[V&T - version 1.0]]></string>
+
 </resources>

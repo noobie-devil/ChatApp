@@ -8,6 +8,7 @@ import android.view.View;
 
 
 import com.zileanstdio.chatapp.Base.BaseActivity;
+import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 
 public class LoginActivity extends BaseActivity {
@@ -41,6 +42,11 @@ public class LoginActivity extends BaseActivity {
     @Override
     public Integer getViewRootId() {
         return R.id.clLoginActivity;
+    }
+
+    @Override
+    public void replaceFragment(BaseFragment fragment) {
+
     }
 
     @Override

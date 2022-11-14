@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -34,6 +35,7 @@ import com.zileanstdio.chatapp.Ui.register.verifyOtp.VerifyOtpView;
 import java.util.regex.Pattern;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
 public class EnterPhoneNumberView extends BaseFragment {
@@ -42,6 +44,8 @@ public class EnterPhoneNumberView extends BaseFragment {
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallBacks;
     private TextInputLayout phoneNumberInputLayout;
     private EditText phoneNumberInputEditText;
+    private final CompositeDisposable disposable = new CompositeDisposable();
+
 
     @Override
     public ViewModel getViewModel() {
@@ -103,13 +107,9 @@ public class EnterPhoneNumberView extends BaseFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.layout_enter_number_phone_view, container, false);
-        View v = super.onCreateView(inflater, view, savedInstanceState);
-        initView(v);
-
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initView(view);
         if(phoneNumberInputEditText != null) {
             ((RegisterViewModel)baseActivity.getViewModel()).getRegisterInfo()
                     .observe(getViewLifecycleOwner(), user -> phoneNumberInputEditText.setText(user.getPhoneNumber()));
@@ -117,13 +117,22 @@ public class EnterPhoneNumberView extends BaseFragment {
             Observable<Boolean> phoneNumberInputObservable = RxTextView.textChanges(phoneNumberInputEditText)
                     .map(inputText -> validatePhoneNumber(inputText.toString()))
                     .distinctUntilChanged();
-
-            phoneNumberInputObservable.subscribe(isValid -> ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(isValid));
+            disposable.add(phoneNumberInputObservable.subscribe(isValid ->
+                    ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(isValid)
+            ));
+//            phoneNumberInputObservable.subscribe(isValid -> ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(isValid));
         }
 
         ((RegisterActivity) baseActivity).getNextActionBtn().setOnClickListener(v1 -> openConfirmDialog(phoneNumberInputEditText.getText().toString().trim()));
 
-        return v;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.layout_enter_number_phone_view, container, false);
+        return super.onCreateView(inflater, view, savedInstanceState);
     }
 
     private boolean validatePhoneNumber(String phoneNumberInput) {
@@ -152,7 +161,7 @@ public class EnterPhoneNumberView extends BaseFragment {
         try {
             swissNumberProto = phoneNumberUtil.parse(temp, "VN");
         } catch (NumberParseException e) {
-            Log.d(getTag(), "NumberParseException was thrown: " + e);
+            Log.d(TAG, "NumberParseException was thrown: " + e);
 
         }
         temp = phoneNumberUtil.format(swissNumberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
@@ -176,7 +185,7 @@ public class EnterPhoneNumberView extends BaseFragment {
             if(stateResource != null) {
                 switch (stateResource.status) {
                     case LOADING:
-                        baseActivity.showLoadingDialog(false);
+                        baseActivity.showLoadingDialog();
                         break;
                     case SUCCESS:
 //                        baseActivity.closeLoadingDialog();
@@ -185,25 +194,29 @@ public class EnterPhoneNumberView extends BaseFragment {
                         break;
                     case ERROR:
                         baseActivity.closeLoadingDialog();
-                        showSnackBar(stateResource.message);
+                        showSnackBar(stateResource.message, Snackbar.LENGTH_LONG);
                         break;
                 }
             }
         });
     }
 
-    private void showSnackBar(String msg) {
-        Snackbar.make(viewRoot, msg, Snackbar.LENGTH_LONG).show();
-    }
+
 
     @Override
     public void onStop() {
+        super.onStop();
         String phoneNumberInput = phoneNumberInputEditText.getText().toString().trim();
         Log.d("DEBUG_APP", "onStop:phoneNumberInput - " + phoneNumberInput);
         Log.d("DEBUG_APP", "onStop:mVerificationId - " + mVerificationId);
 
         ((RegisterViewModel)baseActivity.getViewModel()).savePhoneNumberInput(phoneNumberInput);
-//        ((RegisterViewModel)baseActivity.getViewModel()).saveVerificationId(mVerificationId);
-        super.onStop();
+        disposable.clear();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
     }
 }

@@ -9,7 +9,6 @@
         android:id="@+id/navigiation_contacts"
         android:title="@string/contacts"
         android:icon="@drawable/contacts_selector"
-        android:iconTint="@color/color_state"
         />
     <item
         android:id="@+id/navigiation_profile"

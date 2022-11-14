@@ -1,6 +1,9 @@
 package com.zileanstdio.chatapp.Utils;
 
 public class Constants {
+    public static final int READ_CONTACTS_CODE = 101;
+    public static final int WRITE_CONTACTS_CODE = 102;
+
     public static final String KEY_COLLECTION_AUTH = "Auth";
     public static final String KEY_COLLECTION_USERS = "User";
     public static final String KEY_COLLECTION_CHAT_MESSAGE = "ChatMessage";
