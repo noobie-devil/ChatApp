@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.ViewModel.ViewModelProviderFactory;
 
@@ -93,5 +94,9 @@ public abstract class BaseFragment<V extends ViewModel> extends DaggerFragment i
     @Override
     public void onClick(View v) {
 
+    }
+
+    protected void showSnackBar(String msg, int duration) {
+        Snackbar.make(viewRoot, msg, duration).show();
     }
 }

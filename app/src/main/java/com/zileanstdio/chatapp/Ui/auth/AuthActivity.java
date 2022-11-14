@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.zileanstdio.chatapp.Adapter.SliderAdapter;
 import com.zileanstdio.chatapp.Base.BaseActivity;
+import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.login.LoginActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
@@ -40,6 +41,11 @@ public class AuthActivity extends BaseActivity {
     @Override
     public Integer getViewRootId() {
         return null;
+    }
+
+    @Override
+    public void replaceFragment(BaseFragment fragment) {
+
     }
 
     @Override

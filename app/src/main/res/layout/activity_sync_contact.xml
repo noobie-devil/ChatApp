@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/clSyncContactActivity"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="Ui.sync.SyncContactActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:paddingHorizontal="@dimen/_10sdp"
+    >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/_12sdp"
+            >
+            <androidx.appcompat.widget.SearchView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_35sdp"
+                app:iconifiedByDefault="false"
+                app:queryHint="@string/search_text"
+                app:queryBackground="@null"
+                android:background="@drawable/search_shape_bg"
+                android:elevation="0dp"
+                android:theme="@style/SearchViewThem"
+                app:submitBackground="@null"
+                />
+        </LinearLayout>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Danh sách liên hệ bạn có lưu số trong danh bạ"
+            android:paddingVertical="@dimen/_10sdp"
+            android:textStyle="bold"
+            android:gravity="left"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_add_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 import com.zileanstdio.chatapp.DI.ViewModelKey;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
 import com.zileanstdio.chatapp.Ui.register.enterName.EnterNameViewModel;
+import com.zileanstdio.chatapp.Ui.register.enterPassword.EnterPasswordViewModel;
 import com.zileanstdio.chatapp.Ui.register.enterPhoneNumber.EnterPhoneNumberViewModel;
 import com.zileanstdio.chatapp.Ui.register.verifyOtp.VerifyOtpViewModel;
 
@@ -34,4 +35,9 @@ public abstract class RegisterViewModelModule {
     @IntoMap
     @ViewModelKey(VerifyOtpViewModel.class)
     public abstract ViewModel bindVerifyOtpViewModel(VerifyOtpViewModel viewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(EnterPasswordViewModel.class)
+    public abstract ViewModel bindEnterPasswordViewModel(EnterPasswordViewModel viewModel);
 }

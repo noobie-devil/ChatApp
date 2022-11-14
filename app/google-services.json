@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "72556833256-a13vt0dpb1inn2cf733iukjjpgqasuse.apps.googleusercontent.com",
+          "client_id": "72556833256-obho5akusvthdahih44jmv7t61k0dbj9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.zileanstdio.chatapp",
-            "certificate_hash": "24ca42d98bf99cacbe80ba5d6af8ffb0af9344db"
+            "certificate_hash": "d215a853d363913621b9acb68a05af1c3827c569"
           }
         },
         {

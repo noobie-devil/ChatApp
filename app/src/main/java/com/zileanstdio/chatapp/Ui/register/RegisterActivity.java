@@ -50,6 +50,14 @@ public class RegisterActivity extends BaseActivity {
     }
 
     @Override
+    public void replaceFragment(BaseFragment fragment) {
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.activity_register_content_frame, fragment);
+        fragmentTransaction.addToBackStack(fragment.getTag());
+        fragmentTransaction.commit();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         bundle = new Bundle();
 //        savedStateViewModelFactory = new SavedStateViewModelFactory(BaseApplication.getInstance(), this, bundle);
@@ -73,10 +81,6 @@ public class RegisterActivity extends BaseActivity {
 
     }
 
-    public void replaceFragment(BaseFragment fragment) {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.activity_register_content_frame, fragment);
-        fragmentTransaction.addToBackStack(fragment.getTag());
-        fragmentTransaction.commit();
-    }
+
+
 }
