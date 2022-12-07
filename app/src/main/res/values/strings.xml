@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chat app</string>
+    <string name="app_name">Zimess</string>
     <string name="messages">Tin nhắn</string>
     <string name="contacts">Danh bạ</string>
     <string name="profile">Cá nhân</string>
@@ -32,5 +32,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="zimess_version_1_0">Zimess - version 1.0</string>
+    <string name="chat_app_icon">Chat App Icon</string>
 
 </resources>
