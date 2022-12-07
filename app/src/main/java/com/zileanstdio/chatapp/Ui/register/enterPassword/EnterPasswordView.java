@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +14,6 @@ import android.widget.EditText;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthCredential;
 import com.jakewharton.rxbinding4.view.RxView;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.zileanstdio.chatapp.Base.BaseFragment;
@@ -24,6 +21,7 @@ import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.Objects;
 
@@ -34,7 +32,6 @@ public class EnterPasswordView extends BaseFragment {
 
     private TextInputLayout textInputPassword;
     private User user;
-    private PhoneAuthCredential phoneAuthCredential;
     private final CompositeDisposable disposable = new CompositeDisposable();
 
     public EnterPasswordView() {
@@ -43,11 +40,6 @@ public class EnterPasswordView extends BaseFragment {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public void setPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential) {
-        Log.d(TAG + ":setPhoneAuthCredential", phoneAuthCredential.getSmsCode());
-        this.phoneAuthCredential = phoneAuthCredential;
     }
 
     @Override
@@ -90,8 +82,6 @@ public class EnterPasswordView extends BaseFragment {
     private void setListeners() {
         ((RegisterViewModel) baseActivity.getViewModel()).getRegisterInfo()
                 .observe(getViewLifecycleOwner(), this::setUser);
-        ((RegisterViewModel) baseActivity.getViewModel()).getPhoneAuthCredential()
-                .observe(getViewLifecycleOwner(), this::setPhoneAuthCredential);
 
         EditText passwordEditText = textInputPassword.getEditText();
         if(passwordEditText != null) {
@@ -114,7 +104,7 @@ public class EnterPasswordView extends BaseFragment {
                 textInputPassword.getEditText().setSelection(0);
 
             } catch (NullPointerException e) {
-                Log.d(getTag(), e.getMessage());
+                Debug.log(getTag(), e.getMessage());
             }
             return false;
         } else if(password.length() < 8 || password.length() > 64) {
@@ -135,28 +125,7 @@ public class EnterPasswordView extends BaseFragment {
                                 baseActivity.showLoadingDialog();
                                 break;
                             case SUCCESS:
-                                FirebaseUser firebaseUser = (FirebaseUser) stateResource.data;
-                                Log.d(TAG + ":subscribeObservers", phoneAuthCredential.getSmsCode());
-                                ((EnterPasswordViewModel) viewModel).linkWithPhoneAuthProvider(phoneAuthCredential, firebaseUser);
-                                break;
-                            case ERROR:
-                                baseActivity.closeLoadingDialog();
-                                showSnackBar(stateResource.message, Snackbar.LENGTH_LONG);
-                                break;
-                        }
-                    }
-                });
-
-        ((EnterPasswordViewModel) viewModel).observeLinkWithPhoneAuthProvider()
-                .observe(this, stateResource -> {
-                    if(stateResource != null) {
-                        switch (stateResource.status) {
-                            case LOADING:
-                                baseActivity.showLoadingDialog();
-                                break;
-                            case SUCCESS:
-                                ((EnterPasswordViewModel) viewModel).updateRegisterInfo(user);
-                                break;
+                                ((EnterPasswordViewModel) viewModel).updateRegisterInfo(user);                                break;
                             case ERROR:
                                 baseActivity.closeLoadingDialog();
                                 showSnackBar(stateResource.message, Snackbar.LENGTH_LONG);
@@ -174,6 +143,7 @@ public class EnterPasswordView extends BaseFragment {
                                 break;
                             case SUCCESS:
                                 baseActivity.closeLoadingDialog();
+                                
                                 showSnackBar("Registered successfully", Snackbar.LENGTH_LONG);
                                 break;
                             case ERROR:

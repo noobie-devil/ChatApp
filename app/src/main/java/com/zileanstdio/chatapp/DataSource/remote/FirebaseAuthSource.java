@@ -117,48 +117,6 @@ public class FirebaseAuthSource {
         });
     }
 
-//    public Completable createWithEmailPasswordAuthCredential(String email, String password) {
-//        return Completable.create(emitter -> {
-//            firebaseAuth.createUserWithEmailAndPassword(email, password)
-//                    .addOnSuccessListener(authResult -> {
-//                        firebaseAuth.signInWithEmailAndPassword(email, password)
-//                                .addOnSuccessListener(command -> {
-//                                    FirebaseUser firebaseUser = command.getUser();
-//                                    if (firebaseUser != null) {
-//                                        Log.d(TAG + ":createWithEmailPasswordAuthCredential", firebaseUser.getEmail());
-//                                    } else {
-//                                        Log.d(TAG + ":createWithEmailPasswordAuthCredential", "firebaseUser is null");
-//
-//                                    }
-//                                    emitter.onComplete();
-//                                })
-//                                .addOnFailureListener(e -> {
-//                                    Log.d(TAG + ":createWithEmailPasswordAuthCredential", e.getMessage());
-//                                    emitter.onError(e);
-//                                });
-//
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        Log.d(TAG + ":createWithEmailPasswordAuthCredential", e.getMessage());
-//                        emitter.onError(e);
-//                    });
-//        });
-//    }
-
-    public Completable linkWithPhoneAuthProvider(PhoneAuthCredential phoneAuthCredential, FirebaseUser firebaseUser) {
-        return Completable.create(emitter -> {
-            Log.d(TAG + ":linkWithPhoneAuthProvider", firebaseUser.getEmail());
-            Log.d(TAG + ":linkWithPhoneAuthProvider", "phoneAuthCredential " + phoneAuthCredential.getSmsCode());
-
-            firebaseUser
-                    .linkWithCredential(phoneAuthCredential)
-                    .addOnSuccessListener(authResult -> emitter.onComplete())
-                    .addOnFailureListener(e -> {
-                        Log.d(TAG + ":linkWithPhoneAuthProvider", e.getMessage());
-                        emitter.onError(e);
-                    });
-        });
-    }
 
     public Completable updateRegisterInfo(User user) {
         return Completable.create(emitter -> {
@@ -177,6 +135,16 @@ public class FirebaseAuthSource {
                 Log.d(TAG + ":updateRegisterInfo", new NullPointerException().getMessage());
                 emitter.onError(new NullPointerException());
             }
+        });
+    }
+
+    public Completable login(String phoneNumber, String password) {
+        return Completable.create(emitter -> {
+            firebaseAuth.signInWithEmailAndPassword(String.format("%s@gmail.com", phoneNumber), password)
+                    .addOnSuccessListener(command -> {
+                        emitter.onComplete();
+                    })
+                    .addOnFailureListener(emitter::onError);
         });
     }
 

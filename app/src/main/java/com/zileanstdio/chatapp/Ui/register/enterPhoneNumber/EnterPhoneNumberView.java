@@ -3,7 +3,6 @@ package com.zileanstdio.chatapp.Ui.register.enterPhoneNumber;
 import android.os.Bundle;
 
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +30,7 @@ import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
 import com.zileanstdio.chatapp.Ui.register.verifyOtp.VerifyOtpView;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.regex.Pattern;
 
@@ -72,7 +72,7 @@ public class EnterPhoneNumberView extends BaseFragment {
                 baseActivity.closeLoadingDialog();
                 phoneNumberInputEditText.setEnabled(true);
                 ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(true);
-                Log.d("DEBUG_APP", e.getMessage());
+                Debug.log("DEBUG_APP", e.getMessage());
                 Snackbar.make(viewRoot, e.getMessage(), Snackbar.LENGTH_LONG).show();
             }
 
@@ -83,7 +83,7 @@ public class EnterPhoneNumberView extends BaseFragment {
                 ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(true);
                 mVerificationId = verificationId;
                 ((RegisterViewModel)baseActivity.getViewModel()).saveVerificationId(verificationId);
-                ((RegisterActivity) baseActivity).replaceFragment(new VerifyOtpView());
+                baseActivity.replaceFragment(new VerifyOtpView());
 
             }
         };
@@ -98,7 +98,6 @@ public class EnterPhoneNumberView extends BaseFragment {
     private void initView(View view) {
         TextInputLayout regionCodeInputLayout = view.findViewById(R.id.text_input_region_code);
         phoneNumberInputLayout = view.findViewById(R.id.text_input_number_phone);
-        EditText regionCodeInputEditText = regionCodeInputLayout.getEditText();
         phoneNumberInputEditText = phoneNumberInputLayout.getEditText();
         MaterialAutoCompleteTextView autoCompleteTextView = view.findViewById(R.id.auto_complete_region_code);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.layout_dropdown_list, items);
@@ -161,7 +160,7 @@ public class EnterPhoneNumberView extends BaseFragment {
         try {
             swissNumberProto = phoneNumberUtil.parse(temp, "VN");
         } catch (NumberParseException e) {
-            Log.d(TAG, "NumberParseException was thrown: " + e);
+            Debug.log(TAG, "NumberParseException was thrown: " + e);
 
         }
         temp = phoneNumberUtil.format(swissNumberProto, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
@@ -207,8 +206,8 @@ public class EnterPhoneNumberView extends BaseFragment {
     public void onStop() {
         super.onStop();
         String phoneNumberInput = phoneNumberInputEditText.getText().toString().trim();
-        Log.d("DEBUG_APP", "onStop:phoneNumberInput - " + phoneNumberInput);
-        Log.d("DEBUG_APP", "onStop:mVerificationId - " + mVerificationId);
+        Debug.log("DEBUG_APP", "onStop:phoneNumberInput - " + phoneNumberInput);
+        Debug.log("DEBUG_APP", "onStop:mVerificationId - " + mVerificationId);
 
         ((RegisterViewModel)baseActivity.getViewModel()).savePhoneNumberInput(phoneNumberInput);
         disposable.clear();

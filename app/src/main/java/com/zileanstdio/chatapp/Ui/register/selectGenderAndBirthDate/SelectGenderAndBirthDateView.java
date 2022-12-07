@@ -23,6 +23,7 @@ import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
 import com.zileanstdio.chatapp.Ui.register.enterPassword.EnterPasswordView;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -137,7 +138,7 @@ public class SelectGenderAndBirthDateView extends BaseFragment {
             }
             return null;
         } catch (ParseException e) {
-            Log.d(TAG, e.getMessage());
+            Debug.log(TAG, e.getMessage());
             return null;
         }
     }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
+import com.zileanstdio.chatapp.Utils.Debug;
 import com.zileanstdio.chatapp.Utils.StateResource;
 
 import javax.inject.Inject;
@@ -41,7 +42,8 @@ public class VerifyOtpViewModel extends ViewModel {
 
                     @Override
                     public void onComplete() {
-                        onAuthResult.setValue(StateResource.success());
+                        Debug.log("VerifyOtpViewModel:signInWithPhoneAuthCredential", phoneAuthCredential.getSmsCode());
+                        onAuthResult.setValue(StateResource.success(phoneAuthCredential));
                     }
 
                     @Override

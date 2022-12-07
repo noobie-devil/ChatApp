@@ -33,8 +33,12 @@ public class AuthRepository {
         return this.firebaseAuthSource.signInWithPhoneAuthCredential(phoneAuthCredential);
     }
 
-    public Completable linkWithPhoneAuthProvider(PhoneAuthCredential phoneAuthCredential, FirebaseUser firebaseUser) {
-        return this.firebaseAuthSource.linkWithPhoneAuthProvider(phoneAuthCredential, firebaseUser);
+//    public Completable linkWithPhoneAuthProvider(PhoneAuthCredential phoneAuthCredential, FirebaseUser firebaseUser) {
+//        return this.firebaseAuthSource.linkWithPhoneAuthProvider(phoneAuthCredential, firebaseUser);
+//    }
+
+    public Completable login(String phoneNumber, String password) {
+        return this.firebaseAuthSource.login(phoneNumber, password);
     }
 
     public Observable<FirebaseUser> createWithEmailPasswordAuthCredential(String email, String password) {

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/Widget.Material3.CardView.Outlined"
+    app:cardCornerRadius="0dp"
+    app:strokeWidth="0dp"
+    app:contentPaddingLeft="@dimen/_10sdp"
+    app:contentPaddingTop="@dimen/_5sdp"
+    app:contentPaddingBottom="@dimen/_10sdp"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imv_avatar"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintWidth_percent="0.18"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/view_content"
+            app:shapeAppearanceOverlay="@style/Circular"
+            android:src="@drawable/image_01"
+            android:scaleType="centerCrop"
+            />
+        <LinearLayout
+            android:gravity="center"
+            android:paddingStart="@dimen/_15sdp"
+            android:id="@+id/view_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/imv_avatar"
+
+            app:layout_constraintWidth_percent="0.82"
+            app:layout_constraintDimensionRatio="4.555:1"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CNPM v DBMS"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_last_message"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="Đã bày tỏ cảm xúc Like về tin nhắn của bạn"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/tv_date_send"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    app:layout_constraintWidth_percent="0.7"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_date_send"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="- 3 Thg 12"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/tv_last_message"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</com.google.android.material.card.MaterialCardView>

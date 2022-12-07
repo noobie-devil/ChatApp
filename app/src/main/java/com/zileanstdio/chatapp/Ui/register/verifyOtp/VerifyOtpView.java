@@ -25,6 +25,7 @@ import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
 import com.zileanstdio.chatapp.Ui.register.selectGenderAndBirthDate.SelectGenderAndBirthDateView;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.concurrent.TimeUnit;
 
@@ -83,13 +84,12 @@ public class VerifyOtpView extends BaseFragment {
             @Override
             public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
                 baseActivity.closeLoadingDialog();
-                ((RegisterViewModel)baseActivity.getViewModel()).savePhoneAuthCredential(phoneAuthCredential);
             }
 
             @Override
             public void onVerificationFailed(@NonNull FirebaseException e) {
                 baseActivity.closeLoadingDialog();
-                Log.d("DEBUG_APP", e.getMessage());
+                Debug.log("DEBUG_APP", e.getMessage());
                 Snackbar.make(viewRoot, e.getMessage(), Snackbar.LENGTH_LONG).show();
             }
 
@@ -147,7 +147,7 @@ public class VerifyOtpView extends BaseFragment {
                             .subscribe(unit -> {
                                 baseActivity.showLoadingDialog();
                                 String phoneNumberFormat = String.format("%s%s", "+84", phoneNumber);
-                                Log.d(TAG, "DEBUG_APP:phoneNumberFormat - " + phoneNumberFormat);
+                                Debug.log(TAG, "DEBUG_APP:phoneNumberFormat - " + phoneNumberFormat);
                                 ((RegisterViewModel)baseActivity.getViewModel()).phoneNumberVerification(phoneNumberFormat, getActivity(), mCallBacks);
 
                             })
