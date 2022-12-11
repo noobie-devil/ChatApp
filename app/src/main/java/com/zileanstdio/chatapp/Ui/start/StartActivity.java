@@ -1,6 +1,7 @@
 package com.zileanstdio.chatapp.Ui.start;
 
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -14,22 +15,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.auth.AuthActivity;
 import com.zileanstdio.chatapp.Ui.main.MainActivity;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
 public class StartActivity extends BaseActivity {
 
-    private int STATUS = 0;
     private boolean isLogin = false;
+    private int STATUS = 0;
+    private String message = "";
+
+    private final CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     public ViewModel getViewModel() {
-        return null;
+        if (viewModel == null) {
+            viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(StartViewModel.class);
+        }
+        return viewModel;
     }
 
     @Override
@@ -50,6 +57,7 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        subscribeObservers();
 
         ImageView imageIcon = findViewById(R.id.image_icon);
         ProgressBar progressWait = findViewById(R.id.progress_wait);
@@ -65,8 +73,6 @@ public class StartActivity extends BaseActivity {
         AnimatorSet animateImage = new AnimatorSet();
         animateImage.play(scaleImageX).with(scaleImageY).with(translationImageY);
 
-        checkUser();
-
         // Thực hiện các chuyển động
         new Handler().postDelayed(() -> {
             animateImage.start();
@@ -78,6 +84,21 @@ public class StartActivity extends BaseActivity {
                 transferActivity();
             }, 1200);
         }, 750);
+
+        // Kiểm tra User
+        ((StartViewModel) viewModel).checkLoginUser();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        disposable.clear();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
     }
 
     @Override
@@ -85,34 +106,30 @@ public class StartActivity extends BaseActivity {
 
     }
 
-    public void checkUser() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = firebaseAuth.getCurrentUser();
-
-        // Kiểm tra người dùng đăng nhập
-        if ((user == null) || (user.getEmail() == null)) {
-            isLogin = false;
-            Toast.makeText(this, "Vui lòng đăng nhập vào 'Zimess'", Toast.LENGTH_SHORT).show();
-            STATUS ++;
-            transferActivity();
-        } else {
-            // Kiểm tra tài khoản người dùng còn hợp lệ
-            firebaseAuth.fetchSignInMethodsForEmail(user.getEmail()).addOnCompleteListener(task -> {
-                if (task.getResult().getSignInMethods() != null && task.getResult().getSignInMethods().isEmpty()) {
-                    firebaseAuth.signOut();
-                    isLogin = false;
-                    Toast.makeText(this, "Không thể xác nhận tài khoản.\nVui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
-                } else {
-                    isLogin = true;
-                    Toast.makeText(this, "Chào mừng trở lại 'Zimess'", Toast.LENGTH_SHORT).show();
+    public void subscribeObservers() {
+        // Lắng nghe kết quả trả về từ quá trình kiểm tra User
+        ((StartViewModel) viewModel).observeCheckLoginUser().observe(this, stateResource -> {
+            if (stateResource != null) {
+                switch (stateResource.status) {
+                    case SUCCESS:
+                        isLogin = true;
+                        STATUS ++;
+                        message = "Chào mừng trở lại";
+                        transferActivity();
+                        break;
+                    case ERROR:
+                        isLogin = false;
+                        STATUS ++;
+                        message = stateResource.message;
+                        transferActivity();
+                        break;
                 }
-                STATUS ++;
-                transferActivity();
-            });
-        }
+            }
+        });
     }
 
     private void transferActivity() {
+        // Đợi hoàn thành 'chuyển động' + 'kiểm tra User' -> chuyển Activity khi cả 2 hoàn thành
         if (STATUS == 2) {
             Intent intent;
             if (isLogin) {
@@ -120,6 +137,7 @@ public class StartActivity extends BaseActivity {
             } else {
                 intent = new Intent(this, AuthActivity.class);
             }
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             startActivity(intent);
             finish();
         }

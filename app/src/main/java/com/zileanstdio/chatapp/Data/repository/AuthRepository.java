@@ -47,4 +47,8 @@ public class AuthRepository {
     public Completable updateRegisterInfo(User user) {
         return this.firebaseAuthSource.updateRegisterInfo(user);
     }
+
+    public Completable checkLoginUser() {
+        return this.firebaseAuthSource.checkLoginUser();
+    }
 }

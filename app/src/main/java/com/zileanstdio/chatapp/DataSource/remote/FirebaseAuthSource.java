@@ -1,6 +1,7 @@
 package com.zileanstdio.chatapp.DataSource.remote;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Exceptions.PhoneNumberException;
+import com.zileanstdio.chatapp.Exceptions.UserException;
 import com.zileanstdio.chatapp.Exceptions.VerificationException;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Constants;
@@ -148,5 +150,26 @@ public class FirebaseAuthSource {
         });
     }
 
+    public Completable checkLoginUser() {
+        return Completable.create(emitter -> {
+            FirebaseUser user = getCurrentFirebaseUser();
 
+            // Kiểm tra người dùng đăng nhập
+            if ((user == null) || (user.getEmail() == null)) {
+                emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
+                        "Vui lòng đăng nhập tài khoản"));
+            } else {
+                // Kiểm tra tài khoản người dùng còn hợp lệ
+                firebaseAuth.fetchSignInMethodsForEmail(user.getEmail()).addOnCompleteListener(task -> {
+                    if (task.getResult().getSignInMethods() != null && task.getResult().getSignInMethods().isEmpty()) {
+                        firebaseAuth.signOut();
+                        emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
+                                "Không thể xác nhận tài khoản.\nVui lòng đăng nhập lại!"));
+                    } else {
+                        emitter.onComplete();
+                    }
+                });
+            }
+        });
+    }
 }
