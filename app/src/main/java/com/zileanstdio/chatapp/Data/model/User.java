@@ -1,7 +1,10 @@
 package com.zileanstdio.chatapp.Data.model;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class User implements Serializable {
     private String fullName;
@@ -13,10 +16,9 @@ public class User implements Serializable {
     private String avatarImageUrl;
     private Date createdAt;
     private Date lastOnline;
+    private List<String> conversationList;
 
-    public User() {}
-
-    public User(String fullName, String userName, boolean onlineStatus, String phoneNumber, String gender, String birthDate, String avatarImageUrl, Date createdAt, Date lastOnline) {
+    public User(String fullName, String userName, boolean onlineStatus, String phoneNumber, String gender, String birthDate, String avatarImageUrl, Date createdAt, Date lastOnline, List<String> conversationList) {
         this.fullName = fullName;
         this.userName = userName;
         this.onlineStatus = onlineStatus;
@@ -26,7 +28,19 @@ public class User implements Serializable {
         this.avatarImageUrl = avatarImageUrl;
         this.createdAt = createdAt;
         this.lastOnline = lastOnline;
+        this.conversationList = conversationList;
     }
+
+    public List<String> getConversationList() {
+        return conversationList;
+    }
+
+    public void setConversationList(List<String> conversationList) {
+        this.conversationList = conversationList;
+    }
+
+
+    public User() {}
 
     public String getFullName() {
         return fullName;
@@ -100,6 +114,7 @@ public class User implements Serializable {
         this.lastOnline = lastOnline;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "User{" +
@@ -112,6 +127,7 @@ public class User implements Serializable {
                 ", avatarImageUrl='" + avatarImageUrl + '\'' +
                 ", createdAt=" + createdAt +
                 ", lastOnline=" + lastOnline +
+                ", conversationList=" + conversationList +
                 '}';
     }
 }

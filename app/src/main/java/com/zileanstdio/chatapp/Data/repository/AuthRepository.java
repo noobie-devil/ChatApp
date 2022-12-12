@@ -51,4 +51,8 @@ public class AuthRepository {
     public Completable checkLoginUser() {
         return this.firebaseAuthSource.checkLoginUser();
     }
+
+    public FirebaseUser getCurrentFirebaseUser() {
+        return this.firebaseAuthSource.getCurrentFirebaseUser();
+    }
 }

@@ -8,7 +8,7 @@
     <string name="login_text">Đăng nhập</string>
     <string name="register_text">Đăng ký</string>
     <string name="create_account_text">Tạo tài khoản</string>
-    <string name="hint_input_zalo_name_text">Gồm 2-40 kí tự</string>
+    <string name="hint_input_zalo_name_text">Gồm 2–40 kí tự</string>
     <string name="rules_set_name_text1">\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<b>Quy định đặt tên trên Zalo</b>.</string>
     <string name="hint_input_number_phone_text">Nhập số điện thoại</string>
     <string name="confirm_otp_auth_text">Mã kích hoạt sẽ được gửi tới số điện thoại này</string>
@@ -45,5 +45,6 @@
     <string name="password_new_text">Nhập mật khẩu mới</string>
     <string name="password_confirm_text">Nhập lại mật khẩu</string>
     <string name="user_info_text">Thông tin người dùng</string>
+    <string name="noti_introduce_new_message">Các bạn đã là bạn bè của nhau trên Zimess</string>
 
 </resources>

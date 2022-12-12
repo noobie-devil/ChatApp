@@ -6,7 +6,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
+import com.zileanstdio.chatapp.Data.repository.DatabaseRepository;
 import com.zileanstdio.chatapp.DataSource.remote.FirebaseAuthSource;
+import com.zileanstdio.chatapp.DataSource.remote.FirestoreDBSource;
 
 import javax.inject.Singleton;
 
@@ -49,5 +51,16 @@ public class AppModule {
     @Provides
     public SavedStateHandle savedStateHandle() {
         return new SavedStateHandle();
+    }
+
+    @Provides
+    static FirestoreDBSource getFirestoreDBSource(FirebaseFirestore firebaseFirestore) {
+        return new FirestoreDBSource(firebaseFirestore);
+    }
+
+    @Singleton
+    @Provides
+    static DatabaseRepository databaseRepository(FirestoreDBSource firestoreDBSource) {
+        return new DatabaseRepository(firestoreDBSource);
     }
 }

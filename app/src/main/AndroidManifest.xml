@@ -27,18 +27,11 @@
         <activity
             android:name=".Ui.auth.AuthActivity"
             android:exported="true">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".Ui.login.LoginActivity"
             android:exported="false"
-            android:parentActivityName=".Ui.auth.AuthActivity" /> <!-- <activity -->
-        <!-- android:name=".Ui.main.MainActivity" -->
-        <!-- android:exported="true" /> -->
+            android:parentActivityName=".Ui.auth.AuthActivity" />
         <activity
             android:name=".Ui.main.MainActivity"
             android:exported="false" />
@@ -54,6 +47,12 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+        </activity>
+
+        <activity
+            android:name=".Ui.message.MessageActivity"
+            android:exported="true">
+
         </activity>
     </application>
 
