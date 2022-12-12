@@ -6,6 +6,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Ui.main.connections.chat.ChatView">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_conversation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        />
+
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmer_view_recent_conversation"
         android:layout_width="match_parent"

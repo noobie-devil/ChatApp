@@ -33,4 +33,9 @@ public class Constants {
     public static final String KEY_TYPE_TEXT = "string/text";
     public static final String KEY_TYPE_RECORD = "audio/record";
 
+    // TODO: 12/11/2022
+    public static final String KEY_MODIFIED_AT = "modifiedAt";
+    public static final String KEY_COLLECTION_CONVERSATION = "Conversation";
+
+
 }

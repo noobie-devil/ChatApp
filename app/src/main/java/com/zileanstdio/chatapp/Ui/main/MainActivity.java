@@ -3,38 +3,35 @@ package com.zileanstdio.chatapp.Ui.main;
 import androidx.annotation.NonNull;
 
 import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.snackbar.Snackbar;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.main.connections.MainViewPagerAdapter;
+import com.zileanstdio.chatapp.Utils.Debug;
 
-import dagger.android.support.DaggerAppCompatActivity;
-
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity<MainViewModel> {
     private BottomNavigationView bottomNavigationView;
     private ViewPager2 viewPager2;
-    private SearchView searchView;
-    private MaterialCardView searchViewActionLayout;
 
     @Override
-    public ViewModel getViewModel() {
-        return null;
+    public MainViewModel getViewModel() {
+        if(viewModel != null) {
+            return viewModel;
+        }
+        viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(MainViewModel.class);
+        return viewModel;
     }
 
     @Override
@@ -57,57 +54,8 @@ public class MainActivity extends BaseActivity {
         super.initAppBar();
         setTitleToolbar("Tìm kiếm");
         setNavigationIcon(R.drawable.ic_magnifying_glass_light);
-//        toolbar.setBackgroundColor(com.google.android.material.R.attr.colorSurface);
-//        toolbar.setNavigationIconTint();
         setDisplayHomeAsUpEnabled(true);
         setDisplayShowHomeEnabled(false);
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_app_bar, menu);
-//        for(int i = 0; i < menu.size(); i++) {
-//            MenuItem item = menu.getItem(i);
-//            if(item.getItemId() == R.id.search_action) {
-//                if(item.getActionView() != null) {
-//                    searchView = item.getActionView().findViewById(R.id.search_view);
-//                    searchViewActionLayout = item.getActionView().findViewById(R.id.cv_search_action);
-//                    item.getActionView().setOnClickListener(v -> {
-//                        expandSearchViewHorizontal(searchViewActionLayout, 500);
-//                        Snackbar.make(v, "Test", Snackbar.LENGTH_SHORT).show();
-//                    });
-//                }
-//            }
-//        }
-//        return super.onCreateOptionsMenu(menu);
-//    }
-//
-//    private void expandSearchViewHorizontal(View view, int duration) {
-//        int prevWidth = view.getWidth();
-//        ValueAnimator valueAnimator = ValueAnimator.ofInt(prevWidth, (int) getResources().getDimension(com.intuit.sdp.R.dimen._240sdp));
-//        valueAnimator.setDuration(duration);
-//        valueAnimator.setInterpolator(new DecelerateInterpolator());
-//        valueAnimator.addUpdateListener(animation -> {
-//            view.getLayoutParams().width = (int) animation.getAnimatedValue();
-//            searchView.setVisibility(View.VISIBLE);
-//            view.requestLayout();
-//        });
-//        valueAnimator.start();
-//    }
-
-    public int convertDpToPixel(float dp){
-        return (int) (dp * (getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.search_action:
-                Toast.makeText(this, "hahahhahha", Toast.LENGTH_SHORT).show();
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override
@@ -147,6 +95,10 @@ public class MainActivity extends BaseActivity {
             }
             return true;
         });
+
+//        viewModel.getUserInfo().observe(this, user -> {
+//            Debug.log("getUserInfo", user.toString());
+//        });
     }
 
 

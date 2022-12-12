@@ -47,4 +47,8 @@ public class AuthRepository {
     public Completable updateRegisterInfo(User user) {
         return this.firebaseAuthSource.updateRegisterInfo(user);
     }
+
+    public FirebaseUser getCurrentFirebaseUser() {
+        return this.firebaseAuthSource.getCurrentFirebaseUser();
+    }
 }

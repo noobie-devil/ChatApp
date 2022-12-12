@@ -1,7 +1,6 @@
 package com.zileanstdio.chatapp.Ui.register.verifyOtp;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -32,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
-public class VerifyOtpView extends BaseFragment {
+public class VerifyOtpView extends BaseFragment<VerifyOtpViewModel> {
     private EditText inputCode1, inputCode2, inputCode3, inputCode4, inputCode5, inputCode6;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallBacks;
     private String verificationId;
@@ -50,7 +48,7 @@ public class VerifyOtpView extends BaseFragment {
     }
 
     @Override
-    public ViewModel getViewModel() {
+    public VerifyOtpViewModel getViewModel() {
         if(viewModel != null) {
             return viewModel;
         }
@@ -139,25 +137,25 @@ public class VerifyOtpView extends BaseFragment {
             if(verificationId != null) {
                 baseActivity.showLoadingDialog();
                 PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.getCredential(verificationId, code);
-                ((VerifyOtpViewModel) viewModel).signInWithPhoneAuthCredential(phoneAuthCredential);
+                viewModel.signInWithPhoneAuthCredential(phoneAuthCredential);
             }
         });
         disposable.add(RxView.clicks(resendOtpText)
-                            .throttleFirst(60, TimeUnit.SECONDS)
-                            .subscribe(unit -> {
-                                baseActivity.showLoadingDialog();
-                                String phoneNumberFormat = String.format("%s%s", "+84", phoneNumber);
-                                Debug.log(TAG, "DEBUG_APP:phoneNumberFormat - " + phoneNumberFormat);
-                                ((RegisterViewModel)baseActivity.getViewModel()).phoneNumberVerification(phoneNumberFormat, getActivity(), mCallBacks);
+                    .throttleFirst(60, TimeUnit.SECONDS)
+                    .subscribe(unit -> {
+                        baseActivity.showLoadingDialog();
+                        String phoneNumberFormat = String.format("%s%s", "+84", phoneNumber);
+                        Debug.log(TAG, "DEBUG_APP:phoneNumberFormat - " + phoneNumberFormat);
+                        ((RegisterViewModel)baseActivity.getViewModel()).phoneNumberVerification(phoneNumberFormat, getActivity(), mCallBacks);
 
-                            })
+                    })
         );
 
 
     }
 
     private void subscribeObservers(){
-        ((VerifyOtpViewModel) viewModel).observeAuthResult().observe(this, stateResource -> {
+        viewModel.observeAuthResult().observe(this, stateResource -> {
             if(stateResource != null) {
                 switch (stateResource.status) {
                     case LOADING:
