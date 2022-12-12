@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chat app</string>
+    <string name="app_name">Zimess</string>
     <string name="messages">Tin nhắn</string>
     <string name="contacts">Danh bạ</string>
     <string name="profile">Cá nhân</string>
@@ -32,6 +32,19 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="zimess_version_1_0">Zimess - version 1.0</string>
+    <string name="chat_app_icon">Chat App Icon</string>
+    <string name="user_avatar">User Avatar</string>
+    <string name="logout_text">Đăng xuất</string>
+    <string name="name_text">Họ và tên</string>
+    <string name="user_text">User Name</string>
+    <string name="edit_button">Edit Button</string>
+    <string name="select_image">Select Image</string>
+    <string name="user_name_text">Nhập tên người dùng</string>
+    <string name="password_old_text">Nhập mật khẩu cũ</string>
+    <string name="password_new_text">Nhập mật khẩu mới</string>
+    <string name="password_confirm_text">Nhập lại mật khẩu</string>
+    <string name="user_info_text">Thông tin người dùng</string>
     <string name="noti_introduce_new_message">Các bạn đã là bạn bè của nhau trên Zimess</string>
 
 </resources>

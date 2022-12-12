@@ -1,14 +1,326 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Ui.main.connections.profile.ProfileView">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        app:cardCornerRadius="100dp">
+
+        <ImageView
+            android:id="@+id/imv_avatar"
+            android:layout_height="@dimen/_100sdp"
+            android:layout_width="@dimen/_100sdp"
+            android:src="@drawable/icon_start"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/user_avatar" />
+
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_user_name"
+        android:backgroundTint="?attr/colorOnTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_42sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:layout_below="@id/cv_avatar"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_centerInParent="true"
+        android:gravity="start|center_vertical"
+        android:text="Người dùng: Zimess"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="?attr/colorOutline"
+        app:icon="@drawable/ic_solid_pen"
+        app:iconTint="?attr/colorOutline"
+        app:iconGravity="end"
+        app:cornerRadius="0dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_password"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_42sdp"
+        android:layout_below="@id/btn_user_name"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:backgroundTint="?attr/colorOnTertiary"
+        android:gravity="start|center_vertical"
+        android:text="Mật khẩu: **********"
+        android:textColor="?attr/colorOutline"
+        android:textSize="@dimen/_15ssp"
+        app:cornerRadius="0dp"
+        app:icon="@drawable/ic_solid_pen"
+        app:iconGravity="end"
+        app:iconTint="?attr/colorOutline" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/txv_name"
+        android:background="?attr/colorOnTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_37sdp"
+        android:paddingHorizontal="@dimen/_18sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:gravity="start|center_vertical"
+        android:layout_below="@id/btn_password"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_centerInParent="true"
+        android:text="Họ và tên: Nguyễn Văn A"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="?attr/colorOutline"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/txv_phone"
+        android:background="?attr/colorOnTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_37sdp"
+        android:paddingHorizontal="@dimen/_18sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:gravity="start|center_vertical"
+        android:layout_below="@id/txv_name"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_centerInParent="true"
+        android:text="Số điện thoại: 0903120661"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="?attr/colorOutline"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/txv_birthdate"
+        android:background="?attr/colorOnTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_37sdp"
+        android:paddingHorizontal="@dimen/_18sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:gravity="start|center_vertical"
+        android:layout_below="@id/txv_phone"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_centerInParent="true"
+        android:text="Ngày sinh: 12/12/2022"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="?attr/colorOutline"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/txv_gender"
+        android:background="?attr/colorOnTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_37sdp"
+        android:paddingHorizontal="@dimen/_18sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:gravity="start|center_vertical"
+        android:layout_below="@id/txv_birthdate"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_centerInParent="true"
+        android:text="Giới tính: Nam"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="?attr/colorOutline"
+        android:textStyle="bold" />
+
+    <!--<RelativeLayout
+        android:id="@+id/layout_profile_info_linearlayout"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/layout_profile_user_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/_5sdp"
+            android:paddingEnd="@dimen/_5sdp"
+            android:text="@string/user_text"
+            android:textSize="@dimen/_17ssp"
+            android:textStyle="bold"
+            android:layout_toEndOf="@id/layout_profile_card"
+            android:layout_toStartOf="@id/layout_profile_edit_button"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/layout_profile_edit_button"
+            android:background="@drawable/background_edit_button"
+            android:layout_width="@dimen/_35sdp"
+            android:layout_height="@dimen/_35sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/ic_arrow_right_regular"
+            app:tint="@color/white"
+            android:contentDescription="@string/edit_button" />
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/layout_profile_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Profile view" />
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/layout_profile_info_linearlayout"
+        android:layout_above="@id/layout_profile_logout_button">
 
-</FrameLayout>
+        <LinearLayout
+            android:id="@+id/layout_profile_linearlayout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/layout_profile_user_text"
+                android:background="?attr/colorOnPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_30sdp"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/_20sdp"
+                android:paddingEnd="@dimen/_20sdp"
+                android:text="Họ và tên: Nguyễn Văn A"
+                android:textSize="@dimen/_17ssp"
+                android:textStyle="bold" />-->
+
+            <!--<com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/layout_profile_name_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:endIconMode="clear_text"
+                android:hint="@string/name_text"
+                app:counterMaxLength="40"
+                app:errorEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:background="@color/md_theme_light_onSurfaceVariant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="40"
+                    android:inputType="textCapWords"
+                    android:text="Nguyễn Quang Vinh"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@color/white"
+                    android:enabled="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/layout_profile_phone_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:endIconMode="clear_text"
+                android:hint="@string/number_phone_text"
+                app:counterMaxLength="40"
+                app:errorEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:background="@color/md_theme_light_onSurfaceVariant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="40"
+                    android:inputType="textCapWords"
+                    android:text="@string/number_phone_text"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@color/white"
+                    android:enabled="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="10"
+                android:baselineAligned="false">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:id="@+id/layout_profile_birthdate_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="7"
+                    android:layout_marginBottom="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    app:endIconMode="clear_text"
+                    android:hint="@string/birthdate_text"
+                    app:counterMaxLength="40"
+                    app:errorEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:background="@color/md_theme_light_onSurfaceVariant"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLength="40"
+                        android:inputType="textCapWords"
+                        android:text="@string/birthdate_text"
+                        android:textSize="@dimen/_14ssp"
+                        android:textColor="@color/white"
+                        android:enabled="false" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:id="@+id/layout_profile_gender_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:layout_marginBottom="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    app:endIconMode="clear_text"
+                    android:hint="@string/gender_text"
+                    app:counterMaxLength="40"
+                    app:errorEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:background="@color/md_theme_light_onSurfaceVariant"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLength="40"
+                        android:inputType="textCapWords"
+                        android:text="@string/gender_text"
+                        android:textSize="@dimen/_14ssp"
+                        android:textColor="@color/white"
+                        android:enabled="false" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>-->
+
+    <!--    </LinearLayout>
+
+    </ScrollView>-->
+
+    <com.google.android.material.button.MaterialButton
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_marginBottom="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:text="@string/logout_text"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

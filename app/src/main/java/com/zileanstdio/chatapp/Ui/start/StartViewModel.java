@@ -1,11 +1,9 @@
-package com.zileanstdio.chatapp.Ui.login;
+package com.zileanstdio.chatapp.Ui.start;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
-import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
 import com.zileanstdio.chatapp.Utils.StateResource;
 
@@ -18,31 +16,31 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class LoginViewModel extends ViewModel {
+public class StartViewModel extends ViewModel {
 
-    public static final String TAG = "LoginViewModel";
+    public static final String TAG = "StartViewModel";
     private final AuthRepository authRepository;
-    private final MediatorLiveData<StateResource> onLogin = new MediatorLiveData<>();
+    private final MediatorLiveData<StateResource> onCheckLoginUser = new MediatorLiveData<>();
     private final CompositeDisposable disposable = new CompositeDisposable();
 
     @Inject
-    public LoginViewModel(AuthRepository authRepository) {
+    public StartViewModel(AuthRepository authRepository) {
         this.authRepository = authRepository;
     }
 
-    public void login(String phoneNumber, String password) {
-        authRepository.login(phoneNumber, password).subscribeOn(Schedulers.io())
+    public void checkLoginUser() {
+        authRepository.checkLoginUser().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new CompletableObserver() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         disposable.add(d);
-                        onLogin.setValue(StateResource.loading());
+                        onCheckLoginUser.setValue(StateResource.loading());
                     }
 
                     @Override
                     public void onComplete() {
-                        onLogin.setValue(StateResource.success());
+                        onCheckLoginUser.setValue(StateResource.success());
                     }
 
                     @Override
@@ -51,13 +49,13 @@ public class LoginViewModel extends ViewModel {
                         if (e.getMessage() != null) {
                             message = e.getMessage();
                         }
-                        onLogin.setValue(StateResource.error(message));
+                        onCheckLoginUser.setValue(StateResource.error(message));
                     }
                 });
     }
 
-    public LiveData<StateResource> observeLogin() {
-        return onLogin;
+    public LiveData<StateResource> observeCheckLoginUser() {
+        return onCheckLoginUser;
     }
 
     @Override
