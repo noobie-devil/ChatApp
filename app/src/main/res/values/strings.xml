@@ -46,5 +46,6 @@
     <string name="password_confirm_text">Nhập lại mật khẩu</string>
     <string name="user_info_text">Thông tin người dùng</string>
     <string name="noti_introduce_new_message">Các bạn đã là bạn bè của nhau trên Zimess</string>
+    <string name="online">Đang hoạt động</string>
 
 </resources>

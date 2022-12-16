@@ -1,85 +1,268 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Material3.CardView.Outlined"
+    app:cardCornerRadius="0dp"
+    app:strokeWidth="0dp"
+    app:contentPaddingLeft="@dimen/_10sdp"
+    app:contentPaddingTop="@dimen/_5sdp"
 
-    android:orientation="vertical">
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_alphabet"
-        android:layout_width="wrap_content"
+    >
+    <!--    <com.google.android.material.textview.MaterialTextView-->
+    <!--        android:id="@+id/tv_no_result"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:textAlignment="center"-->
+    <!--        android:background="@color/colorAccent"-->
+    <!--        android:text="Không tìm thấy kết quả phù hợp"-->
+    <!--        android:visibility="gone"/>-->
+    <!--    />-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ctl_item_contact"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="A"
-        android:textAppearance="?attr/textAppearanceTitleLarge"
-        />
+        >
+        <!--        <LinearLayout-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content">-->
+        <!--            -->
+        <!--        </LinearLayout>-->
+        <com.google.android.material.textview.MaterialTextView
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/contact_item"
+            android:id="@+id/tv_alphabet"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/imv_avatar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="0dp"
-            style="@style/Widget.Material3.CardView.Outlined"
-            app:strokeWidth="0dp"
-            android:clickable="true"
-            android:focusable="true"
+            android:paddingVertical="@dimen/_2sdp"
+
+
+            android:text="ABCD" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imv_avatar"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintWidth_percent="0.18"
+            app:layout_constraintTop_toBottomOf="@id/tv_alphabet"
+            app:layout_constraintRight_toLeftOf="@id/view_content"
+            app:shapeAppearanceOverlay="@style/Circular"
+            android:src="@drawable/cover_image_profile_exam"
+            android:scaleType="centerCrop"
+            />
+
+        <LinearLayout
+            android:id="@+id/view_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+
+            app:layout_constraintStart_toEndOf="@id/imv_avatar"
+            app:layout_constraintTop_toBottomOf="@id/tv_alphabet"
+            app:layout_constraintLeft_toRightOf="@id/imv_avatar"
+
+            app:layout_constraintWidth_percent="0.61"
+            app:layout_constraintDimensionRatio="3.5:1"
+            android:gravity="center"
+            android:paddingStart="@dimen/_10sdp"
+            android:paddingEnd="@dimen/_10sdp"
             >
-            <LinearLayout
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tv_contact_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="1"
-                >
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:layout_width="0dp"
-                    android:layout_height="@dimen/_60sdp"
-                    android:layout_weight="0.2"
-                    android:src="@drawable/ic_user_light"
-                    app:shapeAppearanceOverlay="@style/Circular"
-                    app:strokeWidth="2dp"
-                    android:scaleType="centerInside"
-                    app:strokeColor="?attr/colorPrimaryContainer"
-                    />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:text="Hello"
-                    android:gravity="center_vertical"
-                    android:paddingStart="@dimen/_20sdp"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    />
 
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.15"
-                    app:icon="@drawable/ic_phone_solid"
-                    android:insetBottom="0dp"
-                    android:insetRight="0dp"
-                    android:insetTop="0dp"
-                    android:insetLeft="0dp"
-                    app:iconGravity="textStart"
-                    app:iconSize="@dimen/_18ssp"
-                    style="@style/Widget.Material3.Button.IconButton"
-                    android:background="@android:color/transparent"
-                    />
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.15"
-                    app:icon="@drawable/ic_video_light"
-                    android:insetBottom="0dp"
-                    android:insetRight="0dp"
-                    android:insetTop="0dp"
-                    android:insetLeft="0dp"
-                    app:iconGravity="textStart"
-                    app:iconSize="@dimen/_20ssp"
-                    style="@style/Widget.Material3.Button.IconButton"
-                    android:background="@android:color/transparent"
-                    />
+                android:text="Hello"
+                android:maxLines="1"
+                android:ellipsize="end"
 
-            </LinearLayout>
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                />
+            <com.google.android.material.textview.MaterialTextView
 
-        </com.google.android.material.card.MaterialCardView>
+                android:id="@+id/tv_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hello"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                />
+            <!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+            <!--                android:id="@+id/cl_name"-->
+            <!--                android:gravity="center_vertical"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="0dp"-->
+            <!--                android:layout_weight="0.5"-->
+            <!--                android:orientation="vertical"-->
+            <!--                >-->
 
-</LinearLayout>
+            <!--                -->
+            <!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@id/view_content"
+            app:layout_constraintTop_toBottomOf="@id/tv_alphabet"
+            app:layout_constraintLeft_toRightOf="@id/view_content"
+            app:layout_constraintWidth_percent="0.18"
+
+            app:layout_constraintDimensionRatio="1:1"
+            android:weightSum="1"
+            >
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_call"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                app:icon="@drawable/ic_phone_light"
+                android:insetBottom="0dp"
+                android:insetRight="0dp"
+                android:insetTop="0dp"
+                android:insetLeft="0dp"
+                app:iconGravity="textStart"
+                app:iconSize="@dimen/_15sdp"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:background="@android:color/transparent"
+                />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_video_call"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                app:icon="@drawable/ic_video_light"
+                android:insetBottom="0dp"
+                android:insetRight="0dp"
+                android:insetTop="0dp"
+                android:insetLeft="0dp"
+                app:iconGravity="textStart"
+                app:iconSize="@dimen/_15sdp"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:background="@android:color/transparent"
+                />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</com.google.android.material.card.MaterialCardView>
+    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+
+    <!--    android:orientation="vertical">-->
+    <!--    <com.google.android.material.textview.MaterialTextView-->
+    <!--        android:id="@+id/tv_alphabet"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:text="A"-->
+    <!--        android:textAppearance="?attr/textAppearanceTitleLarge"-->
+    <!--        />-->
+
+    <!--        <com.google.android.material.card.MaterialCardView-->
+    <!--            android:id="@+id/contact_item"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            app:cardCornerRadius="0dp"-->
+    <!--            style="@style/Widget.Material3.CardView.Outlined"-->
+    <!--            app:strokeWidth="0dp"-->
+    <!--            android:clickable="true"-->
+    <!--            android:focusable="true"-->
+    <!--            >-->
+    <!--            <LinearLayout-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:orientation="horizontal"-->
+    <!--                android:weightSum="1"-->
+    <!--                >-->
+    <!--                <com.google.android.material.imageview.ShapeableImageView-->
+    <!--                    android:layout_width="0dp"-->
+    <!--                    android:layout_height="@dimen/_60sdp"-->
+    <!--                    android:layout_weight="0.2"-->
+    <!--                    android:src="@drawable/ic_user_light"-->
+    <!--                    app:shapeAppearanceOverlay="@style/Circular"-->
+    <!--                    app:strokeWidth="2dp"-->
+    <!--                    android:scaleType="centerInside"-->
+    <!--                    app:strokeColor="?attr/colorPrimaryContainer"-->
+    <!--                    />-->
+    <!--                <LinearLayout-->
+    <!--                    android:gravity="center_vertical"-->
+    <!--                    android:layout_width="0dp"-->
+    <!--                    android:layout_height="match_parent"-->
+    <!--                    android:layout_weight="0.5"-->
+    <!--                    android:orientation="vertical"-->
+    <!--                    >-->
+    <!--                    <com.google.android.material.textview.MaterialTextView-->
+    <!--                        android:id="@+id/tv_contact_name"-->
+    <!--                        android:layout_width="match_parent"-->
+    <!--                        android:layout_height="wrap_content"-->
+
+    <!--                        android:text="Hello"-->
+    <!--                        android:gravity="center_vertical"-->
+    <!--                        android:paddingStart="@dimen/_20sdp"-->
+    <!--                        android:textAppearance="?attr/textAppearanceTitleLarge"-->
+    <!--                        />-->
+    <!--                    <com.google.android.material.textview.MaterialTextView-->
+    <!--                        android:id="@+id/tv_user_name"-->
+    <!--                        android:layout_width="match_parent"-->
+    <!--                        android:layout_height="wrap_content"-->
+
+    <!--                        android:text="Hello"-->
+    <!--                        android:gravity="center_vertical"-->
+    <!--                        android:paddingStart="@dimen/_20sdp"-->
+    <!--                        android:textAppearance="?attr/textAppearanceTitleLarge"-->
+    <!--                        />-->
+    <!--                </LinearLayout>-->
+
+
+
+    <!--                <com.google.android.material.button.MaterialButton-->
+    <!--                    android:layout_width="0dp"-->
+    <!--                    android:layout_height="match_parent"-->
+    <!--                    android:layout_weight="0.15"-->
+    <!--                    app:icon="@drawable/ic_phone_solid"-->
+    <!--                    android:insetBottom="0dp"-->
+    <!--                    android:insetRight="0dp"-->
+    <!--                    android:insetTop="0dp"-->
+    <!--                    android:insetLeft="0dp"-->
+    <!--                    app:iconGravity="textStart"-->
+    <!--                    app:iconSize="@dimen/_18ssp"-->
+    <!--                    style="@style/Widget.Material3.Button.IconButton"-->
+    <!--                    android:background="@android:color/transparent"-->
+    <!--                    />-->
+    <!--                <com.google.android.material.button.MaterialButton-->
+    <!--                    android:layout_width="0dp"-->
+    <!--                    android:layout_height="match_parent"-->
+    <!--                    android:layout_weight="0.15"-->
+    <!--                    app:icon="@drawable/ic_video_light"-->
+    <!--                    android:insetBottom="0dp"-->
+    <!--                    android:insetRight="0dp"-->
+    <!--                    android:insetTop="0dp"-->
+    <!--                    android:insetLeft="0dp"-->
+    <!--                    app:iconGravity="textStart"-->
+    <!--                    app:iconSize="@dimen/_20ssp"-->
+    <!--                    style="@style/Widget.Material3.Button.IconButton"-->
+    <!--                    android:background="@android:color/transparent"-->
+    <!--                    />-->
+
+    <!--            </LinearLayout>-->
+
+    <!--        </com.google.android.material.card.MaterialCardView>-->
+
+    <!--</LinearLayout>-->

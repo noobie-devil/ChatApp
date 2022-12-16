@@ -99,6 +99,9 @@ public class MainActivity extends BaseActivity<MainViewModel> {
 //        viewModel.getUserInfo().observe(this, user -> {
 //            Debug.log("getUserInfo", user.toString());
 //        });
+        viewModel.getListMutableLiveData().observe(this, contacts -> {
+
+        });
     }
 
 

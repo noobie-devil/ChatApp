@@ -4,14 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingRight="@dimen/_10sdp"
-    android:paddingTop="@dimen/_10sdp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:paddingTop="@dimen/_13sdp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/txv_date_send"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:gravity="center"
-        android:visibility="gone"
+        android:visibility="visible"
         android:paddingBottom="@dimen/_8sdp"
         />
     <com.google.android.material.card.MaterialCardView
@@ -32,9 +33,11 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintWidth_percent="0.7"
                 app:layout_constraintRight_toRightOf="parent"
+                android:gravity="right"
                 >
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cv_container_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/Widget.Material3.CardView.Filled"
@@ -46,7 +49,6 @@
                         android:id="@+id/txv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="text from sender contact asldasl salkdjadlka salkdasdlka aslkdasdlkaj aslkdasdlksa salkdasdlkasjd sakdjaslkd askldasdkljas sadklasjdakl sadklasjdl asdasdasl"
                         android:paddingVertical="@dimen/_10sdp"
                         android:textAppearance="?attr/textAppearanceLabelLarge"
                         />

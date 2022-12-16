@@ -28,7 +28,7 @@ public class Constants {
     public static final String KEY_ONLINE_STATUS = "onlineStatus";
     public static final String KEY_LAST_ONLINE = "lastOnline";
     public static final String KEY_TYPE_CALL = "call";
-    public static final String KEY_TYPE_VIDEO_CALL = "videocall";
+    public static final String KEY_TYPE_VIDEO_CALL = "videoCall";
     public static final String KEY_TYPE_MESSAGE = "typeMessage";
     public static final String KEY_TYPE_TEXT = "string/text";
     public static final String KEY_TYPE_RECORD = "audio/record";

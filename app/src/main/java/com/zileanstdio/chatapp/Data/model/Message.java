@@ -3,6 +3,7 @@ package com.zileanstdio.chatapp.Data.model;
 import androidx.annotation.NonNull;
 
 import java.util.Date;
+import java.util.Objects;
 
 // TODO: 12/11/2022  
 public class Message {
@@ -62,5 +63,18 @@ public class Message {
                 ", message='" + message + '\'' +
                 ", sendAt=" + sendAt +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message1 = (Message) o;
+        return Objects.equals(sender, message1.sender) && Objects.equals(type, message1.type) && Objects.equals(message, message1.message) && Objects.equals(sendAt, message1.sendAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sender, type, message, sendAt);
     }
 }

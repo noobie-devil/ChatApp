@@ -48,7 +48,7 @@ public class MessageWrapper {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MessageWrapper that = (MessageWrapper) o;
-        return Objects.equals(documentId, that.documentId) && Objects.equals(message, that.message);
+        return Objects.equals(documentId, that.documentId) && message.equals(that.message);
     }
 
     @Override

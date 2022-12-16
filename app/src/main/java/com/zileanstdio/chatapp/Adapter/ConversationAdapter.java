@@ -3,12 +3,20 @@ package com.zileanstdio.chatapp.Adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -21,7 +29,11 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.Conversation;
@@ -36,12 +48,15 @@ import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
@@ -49,6 +64,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     final Context context;
     final ChatViewModel viewModel;
     final CompositeDisposable disposable = new CompositeDisposable();
+
 
     private final AsyncListDiffer<ConversationWrapper> asyncListDiffer;
 
@@ -80,34 +96,30 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
         final int index = position;
-        Conversation conversation = getItem(position).getConversation();
+        BehaviorSubject<User> userBehaviorSubject = BehaviorSubject.createDefault(new User());
+        BehaviorSubject<Contact> contactBehaviorSubject = BehaviorSubject.createDefault(new Contact());
+        ConversationWrapper conversationWrapper = getItem(position);
         viewModel.getCurrentUser().observe((LifecycleOwner) holder.itemView.getContext(), user -> {
-            for(String uid : conversation.getUserJoined()) {
+            for(String uid : conversationWrapper.getConversation().getUserJoined()) {
                 if(!uid.equals(CipherUtils.Hash.sha256(user.getPhoneNumber()))) {
-                    viewModel.getUserFromUid(uid)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new SingleObserver<User>() {
-                                @Override
-                                public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {
-                                    disposable.add(d);
-                                }
-
-                                @Override
-                                public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull User user) {
-                                    Debug.log(":onBindViewHolder:getUserFromUid:onSuccess", user.toString());
-                                    holder.bindData(index, conversation, null, user);
-                                }
-
-                                @Override
-                                public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
-                                    Debug.log(":onBindViewHolder:getUserFromUid:onError", e.getMessage());
-                                    holder.bindData(index, conversation, null, null);
-                                }
-                            });
+                    viewModel.getUserFromUid(uid).observe((LifecycleOwner) holder.itemView.getContext(), userBehaviorSubject::onNext);
+                    viewModel.getContact(CipherUtils.Hash.sha256(user.getPhoneNumber()), CipherUtils.Hash.sha256(uid))
+                                    .observe((LifecycleOwner) holder.itemView.getContext(), contactBehaviorSubject::onNext);
                 }
             }
         });
+
+        disposable.add(
+            BehaviorSubject.combineLatest(userBehaviorSubject, contactBehaviorSubject, (user, contact) -> user != null || contact != null)
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .subscribe(aBoolean -> {
+                    if(aBoolean) {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            holder.bindData(index, conversationWrapper, contactBehaviorSubject.getValue(), userBehaviorSubject.getValue());
+                        });
+                    }
+                })
+        );
 
     }
 
@@ -130,34 +142,45 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         final MaterialTextView txvLastMessage;
         final MaterialTextView txvName;
         final MaterialTextView txvDateSend;
+        final MaterialCardView rootView;
+        final View view;
 
         public ConversationViewHolder(@NonNull View itemView) {
             super(itemView);
+            view = itemView;
             imvAvatar = itemView.findViewById(R.id.imv_avatar);
             txvName = itemView.findViewById(R.id.txv_name);
             txvLastMessage = itemView.findViewById(R.id.tv_last_message);
             txvDateSend = itemView.findViewById(R.id.tv_date_send);
+            rootView = itemView.findViewById(R.id.cv_conversation_item);
         }
 
         @SuppressLint("UseCompatLoadingForDrawables")
-        public void bindData(int position, Conversation conversation, Contact contact, User contactProfile) {
-            if(contact != null) {
+        public void bindData(int position, ConversationWrapper conversationWrapper, Contact contact, User contactProfile) {
+            Debug.log("bindData");
+            if(contact.getContactName() != null) {
                 this.txvName.setText(contact.getContactName());
             } else {
                 this.txvName.setText(contactProfile.getUserName());
-            }
 
-            if(conversation.getTypeMessage().equals(Constants.KEY_TYPE_RECORD)) {
+            }
+//            if(contact != null) {
+//                this.txvName.setText(contact.getContactName());
+//            } else {
+//                this.txvName.setText(contactProfile.getUserName());
+//            }
+
+            if(conversationWrapper.getConversation().getTypeMessage().equals(Constants.KEY_TYPE_RECORD)) {
                 this.txvLastMessage.setText(context.getResources().getString(R.string.recent_message_type_record));
             } else {
-                this.txvLastMessage.setText(conversation.getLastMessage());
+                this.txvLastMessage.setText(conversationWrapper.getConversation().getLastMessage());
             }
-            this.txvDateSend.setText(Common.getReadableTime(conversation.getLastUpdated()));
+            this.txvDateSend.setText(Common.getReadableTime(conversationWrapper.getConversation().getLastUpdated()));
             if(contactProfile.getAvatarImageUrl() == null) {
                 imvAvatar.setImageResource(R.drawable.ic_default_user);
             } else {
                 Glide.with(context)
-                    .load(contactProfile.getAvatarImageUrl())
+                    .load(contactProfile.getAvatarImageUrl() != null ? contactProfile.getAvatarImageUrl() : R.drawable.ic_default_user)
                     .error(R.drawable.ic_default_user)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .listener(new RequestListener<Drawable>() {
@@ -174,7 +197,13 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     .into(imvAvatar);
             }
 
+            rootView.setOnClickListener(v -> {
+                viewModel.getNavigator().navigateToMessage(conversationWrapper, contact, contactProfile);
+//                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
+            });
         }
+
+
 
         @Override
         public void onClick(View v) {

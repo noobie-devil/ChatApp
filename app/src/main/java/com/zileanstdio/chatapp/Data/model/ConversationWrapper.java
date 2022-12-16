@@ -2,10 +2,11 @@ package com.zileanstdio.chatapp.Data.model;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 // TODO: 12/11/2022
-public class ConversationWrapper {
+public class ConversationWrapper implements Serializable {
 
     private String documentId;
     private Conversation conversation;
