@@ -1,15 +1,22 @@
 package com.zileanstdio.chatapp.Data.repository;
 
 import com.google.firebase.firestore.QuerySnapshot;
+import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
+import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
+import com.zileanstdio.chatapp.Data.model.Message;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.DataSource.remote.FirestoreDBSource;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import kotlinx.coroutines.flow.Flow;
 
 public class DatabaseRepository {
 
@@ -32,6 +39,10 @@ public class DatabaseRepository {
         return firestoreDBSource.getInfoFromUid(uid);
     }
 
+    public Single<Contact> getContact(String uid, String documentId) {
+        return firestoreDBSource.getContact(uid, documentId);
+    }
+
     public Flowable<QuerySnapshot> getMessageList(final String uid) {
         return firestoreDBSource.getMessageList(uid);
     }
@@ -43,4 +54,25 @@ public class DatabaseRepository {
     public Flowable<User> searchUserFromPhoneNumber(String phoneNumberHashed) {
         return firestoreDBSource.searchUserFromPhoneNumber(phoneNumberHashed);
     }
+
+    public Completable sendMessage(ConversationWrapper conversationWrapper, Message message) {
+        return firestoreDBSource.sendMessage(conversationWrapper, message);
+    }
+
+    public Flowable<Contact> getContacts(String uid) {
+        return firestoreDBSource.getContacts(uid);
+    }
+
+    public Flowable<ContactWrapInfo> syncLocalContact(HashMap<String, String> localContact, String uid) {
+        return firestoreDBSource.syncLocalContact(localContact, uid);
+    }
+
+    public Completable sendFriendRequest(ContactWrapInfo contactWrapInfo, String sender) {
+        return firestoreDBSource.sendFriendRequest(contactWrapInfo, sender);
+    }
+
+    public Flowable<ContactWrapInfo> getContactWrapInfo(String uid) {
+        return firestoreDBSource.getContactWrapInfo(uid);
+    }
+
 }

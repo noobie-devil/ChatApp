@@ -17,6 +17,7 @@ import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.main.MainActivity;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.regex.Pattern;
 
@@ -163,7 +164,9 @@ public class LoginActivity extends BaseActivity {
                         closeLoadingDialog();
                         phoneNumberEditText.setEnabled(true);
                         passwordEditText.setEnabled(true);
+                        loginButton.setEnabled(true);
                         Toast.makeText(this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                        Debug.log(stateResource.message);
                         break;
                 }
             }

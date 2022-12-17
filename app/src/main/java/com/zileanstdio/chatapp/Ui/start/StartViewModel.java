@@ -26,6 +26,7 @@ public class StartViewModel extends ViewModel {
     @Inject
     public StartViewModel(AuthRepository authRepository) {
         this.authRepository = authRepository;
+        checkLoginUser();
     }
 
     public void checkLoginUser() {

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class User implements Serializable {
     private String fullName;
@@ -129,5 +130,18 @@ public class User implements Serializable {
                 ", lastOnline=" + lastOnline +
                 ", conversationList=" + conversationList +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return onlineStatus == user.onlineStatus && Objects.equals(fullName, user.fullName) && Objects.equals(userName, user.userName) && Objects.equals(phoneNumber, user.phoneNumber) && Objects.equals(gender, user.gender) && Objects.equals(birthDate, user.birthDate) && Objects.equals(avatarImageUrl, user.avatarImageUrl) && Objects.equals(createdAt, user.createdAt) && Objects.equals(lastOnline, user.lastOnline) && Objects.equals(conversationList, user.conversationList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fullName, userName, onlineStatus, phoneNumber, gender, birthDate, avatarImageUrl, createdAt, lastOnline, conversationList);
     }
 }

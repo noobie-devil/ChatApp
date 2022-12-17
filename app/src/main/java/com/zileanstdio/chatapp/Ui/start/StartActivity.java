@@ -8,6 +8,7 @@ import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -20,14 +21,20 @@ import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.auth.AuthActivity;
 import com.zileanstdio.chatapp.Ui.main.MainActivity;
+import com.zileanstdio.chatapp.Utils.Debug;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 public class StartActivity extends BaseActivity {
 
     private boolean isLogin = false;
     private int STATUS = 0;
     private String message = "";
+    BehaviorSubject<Boolean> animateLoading = BehaviorSubject.createDefault(false);
+    BehaviorSubject<Boolean> checkLoginState = BehaviorSubject.createDefault(false);
 
     private final CompositeDisposable disposable = new CompositeDisposable();
 
@@ -57,7 +64,7 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        subscribeObservers();
+
 
         ImageView imageIcon = findViewById(R.id.image_icon);
         ProgressBar progressWait = findViewById(R.id.progress_wait);
@@ -73,20 +80,37 @@ public class StartActivity extends BaseActivity {
         AnimatorSet animateImage = new AnimatorSet();
         animateImage.play(scaleImageX).with(scaleImageY).with(translationImageY);
 
-        // Thực hiện các chuyển động
+        disposable.add(BehaviorSubject.combineLatest(
+                animateLoading,
+                checkLoginState,
+                (state1, state2) -> state1 && state2
+        ).subscribe(aBoolean -> {
+            if(aBoolean != null && aBoolean) {
+                transferActivity();
+            }
+        }));
+
+        subscribeObservers();
+
+
+//        // Kiểm tra User
+//        ((StartViewModel) viewModel).checkLoginUser();
+
+//        // Thực hiện các chuyển động
         new Handler().postDelayed(() -> {
             animateImage.start();
             textName.setVisibility(View.VISIBLE);
             textName.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
             new Handler().postDelayed(() -> {
                 progressWait.setVisibility(View.VISIBLE);
-                STATUS ++;
-                transferActivity();
+//                STATUS ++;
+                animateLoading.onNext(true);
+//                transferActivity();
             }, 1200);
         }, 750);
 
-        // Kiểm tra User
-        ((StartViewModel) viewModel).checkLoginUser();
+
+
     }
 
     @Override
@@ -113,14 +137,18 @@ public class StartActivity extends BaseActivity {
                 switch (stateResource.status) {
                     case SUCCESS:
                         isLogin = true;
-                        STATUS ++;
+//                        STATUS ++;
                         message = "Chào mừng trở lại";
+                        checkLoginState.onNext(true);
+                        Debug.log("loginState", "success");
                         transferActivity();
                         break;
                     case ERROR:
                         isLogin = false;
-                        STATUS ++;
+//                        STATUS ++;
                         message = stateResource.message;
+                        checkLoginState.onNext(true);
+                        Debug.log("loginState", "error");
                         transferActivity();
                         break;
                 }
@@ -130,7 +158,7 @@ public class StartActivity extends BaseActivity {
 
     private void transferActivity() {
         // Đợi hoàn thành 'chuyển động' + 'kiểm tra User' -> chuyển Activity khi cả 2 hoàn thành
-        if (STATUS == 2) {
+//        if (STATUS == 2) {
             Intent intent;
             if (isLogin) {
                 intent = new Intent(this, MainActivity.class);
@@ -140,6 +168,6 @@ public class StartActivity extends BaseActivity {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             startActivity(intent);
             finish();
-        }
+//        }
     }
 }

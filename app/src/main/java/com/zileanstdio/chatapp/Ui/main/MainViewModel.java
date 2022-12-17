@@ -2,8 +2,10 @@ package com.zileanstdio.chatapp.Ui.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
 import com.zileanstdio.chatapp.Data.repository.DatabaseRepository;
@@ -29,15 +31,60 @@ public class MainViewModel extends ViewModel {
     final CompositeDisposable disposable = new CompositeDisposable();
     final MediatorLiveData<User> currentUserInfo = new MediatorLiveData<>();
 
+    //final String uid;
+    //final MutableLiveData<List<Contact>> listMutableLiveData = new MutableLiveData<>();
+
     @Inject
     public MainViewModel(DatabaseRepository databaseRepository, AuthRepository authRepository) {
         this.databaseRepository = databaseRepository;
         this.authRepository = authRepository;
+
         String id = authRepository.getCurrentFirebaseUser().getEmail();
         if (id != null) {
             id = id.substring(0, id.indexOf('@'));
         }
         loadUserInfo(CipherUtils.Hash.sha256(id));
+
+        //uid = authRepository.getCurrentFirebaseUser().getUid();
+        //loadUserInfo("1bee7ac8a7cddc6bbfedb997da4b4decb50542fb8a6169b6ba31865eedba2105");
+        //loadContacts(uid);
+    }
+
+    public MutableLiveData<List<Contact>> getListMutableLiveData() {
+        return listMutableLiveData;
+    }
+
+    private void loadContacts(String uid) {
+        databaseRepository.getContacts(uid)
+                .subscribeOn(Schedulers.io())
+                .toObservable()
+                .subscribe(new Observer<Contact>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        disposable.add(d);
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Contact contact) {
+                        if(listMutableLiveData.getValue() == null) {
+                            listMutableLiveData.setValue(new ArrayList<Contact>(){{ add(contact);}});
+                        } else{
+                            List<Contact> contacts = listMutableLiveData.getValue();
+                            contacts.add(contact);
+                            listMutableLiveData.setValue(contacts);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     public void loadUserInfo(String id) {

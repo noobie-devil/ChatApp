@@ -2,11 +2,14 @@ package com.zileanstdio.chatapp.Data.model;
 
 import androidx.annotation.NonNull;
 
+import com.zileanstdio.chatapp.Utils.Constants;
+
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 // TODO: 12/11/2022  
-public class Conversation {
+public class Conversation implements Serializable {
     private List<String> userJoined;
     private Date createdAt;
     private String lastMessage;
@@ -14,7 +17,34 @@ public class Conversation {
     private String lastSender;
     private Date lastUpdated;
 
+
+    public enum Type {
+        TEXT(Constants.KEY_TYPE_TEXT),
+        RECORD(Constants.KEY_TYPE_RECORD),
+        CALL(Constants.KEY_TYPE_CALL),
+        VIDEO_CALL(Constants.KEY_TYPE_VIDEO_CALL);
+
+        public final String label;
+
+        private Type(String label) {
+            this.label = label;
+        }
+    }
+
     public Conversation() {
+    }
+
+    public static final Conversation TEXT;
+    public static final Conversation RECORD;
+    public static final Conversation CALL;
+    public static final Conversation VIDEO_CALL;
+
+
+    static {
+        TEXT = new Conversation(Type.TEXT.label);
+        RECORD = new Conversation(Type.RECORD.label);
+        CALL = new Conversation(Type.CALL.label);
+        VIDEO_CALL = new Conversation(Type.VIDEO_CALL.label);
     }
 
     public Conversation(List<String> userJoined, Date createdAt, String lastMessage, String typeMessage, String lastSender, Date lastUpdated) {
@@ -24,6 +54,10 @@ public class Conversation {
         this.typeMessage = typeMessage;
         this.lastSender = lastSender;
         this.lastUpdated = lastUpdated;
+    }
+
+    public Conversation(String typeMessage) {
+        this.typeMessage = typeMessage;
     }
 
     public List<String> getUserJoined() {

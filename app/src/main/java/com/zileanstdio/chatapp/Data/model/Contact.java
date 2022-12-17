@@ -2,6 +2,7 @@ package com.zileanstdio.chatapp.Data.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 public class Contact implements Serializable {
     private String numberPhone;
@@ -59,5 +60,18 @@ public class Contact implements Serializable {
                 ", relationship=" + relationship +
                 ", modifiedAt=" + modifiedAt +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Contact contact = (Contact) o;
+        return relationship == contact.relationship && Objects.equals(numberPhone, contact.numberPhone) && Objects.equals(contactName, contact.contactName) && Objects.equals(modifiedAt, contact.modifiedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numberPhone, contactName, relationship, modifiedAt);
     }
 }

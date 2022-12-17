@@ -1,9 +1,11 @@
 package com.zileanstdio.chatapp.Utils;
 
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class Common {
 
@@ -16,5 +18,11 @@ public class Common {
         else {
             return new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
         }
+    }
+
+    public static String removeAccent(String s) {
+        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(temp).replaceAll("").toUpperCase(Locale.ROOT);
     }
 }

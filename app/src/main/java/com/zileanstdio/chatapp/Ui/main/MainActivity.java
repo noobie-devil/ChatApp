@@ -110,7 +110,12 @@ public class MainActivity extends BaseActivity<MainViewModel> {
             return true;
         });
 
+
         viewModel.getUserInfo().observe(this, user -> currentUser = user);
+
+        viewModel.getListMutableLiveData().observe(this, contacts -> {
+
+        });
     }
 
     @Override
