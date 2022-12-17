@@ -20,7 +20,7 @@
             android:id="@+id/imv_avatar"
             android:layout_height="@dimen/_100sdp"
             android:layout_width="@dimen/_100sdp"
-            android:src="@drawable/icon_start"
+            android:src="@drawable/ic_default_user"
             android:scaleType="centerCrop"
             android:contentDescription="@string/user_avatar" />
 
@@ -80,18 +80,18 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/txv_phone"
-        android:background="?attr/colorOnTertiary"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_37sdp"
-        android:paddingHorizontal="@dimen/_18sdp"
-        android:layout_marginBottom="@dimen/_7sdp"
-        android:gravity="start|center_vertical"
         android:layout_below="@id/txv_name"
-        android:layout_marginHorizontal="@dimen/_2sdp"
         android:layout_centerInParent="true"
-        android:text="Số điện thoại: 0903120661"
-        android:textSize="@dimen/_15ssp"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
+        android:background="?attr/colorOnTertiary"
+        android:gravity="start|center_vertical"
+        android:paddingHorizontal="@dimen/_18sdp"
+        android:text="Số điện thoại: 0987654321"
         android:textColor="?attr/colorOutline"
+        android:textSize="@dimen/_15ssp"
         android:textStyle="bold" />
 
     <com.google.android.material.textview.MaterialTextView

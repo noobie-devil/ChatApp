@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 import com.zileanstdio.chatapp.DI.ViewModelKey;
 import com.zileanstdio.chatapp.Ui.main.MainViewModel;
 import com.zileanstdio.chatapp.Ui.main.connections.chat.ChatViewModel;
+import com.zileanstdio.chatapp.Ui.main.connections.profile.ProfileViewModel;
 
 import dagger.Binds;
 import dagger.Module;
@@ -22,4 +23,9 @@ public abstract class MainViewModelModule {
     @IntoMap
     @ViewModelKey(ChatViewModel.class)
     public abstract ViewModel bindChatViewModel(ChatViewModel viewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ProfileViewModel.class)
+    public abstract ViewModel bindProfileViewModel(ProfileViewModel viewModel);
 }

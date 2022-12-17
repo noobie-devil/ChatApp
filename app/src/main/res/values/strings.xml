@@ -46,5 +46,12 @@
     <string name="password_confirm_text">Nhập lại mật khẩu</string>
     <string name="user_info_text">Thông tin người dùng</string>
     <string name="noti_introduce_new_message">Các bạn đã là bạn bè của nhau trên Zimess</string>
+    <string name="text_phone_number">0987654321</string>
+    <string name="add_friend_text">Kết bạn</string>
+    <string name="notice_change_password">Vui lòng nhập mật khẩu cũ, mật khẩu mới và mật khẩu xác nhận</string>
+    <string name="button_next_change_password">Button Next Change Password</string>
+    <string name="text_password_old">Nhập mật khẩu hiện tại</string>
+    <string name="text_password_new">Nhập mật khẩu mới</string>
+    <string name="text_password_confirm">Nhập lại mật khẩu mới</string>
 
 </resources>

@@ -1,7 +1,7 @@
 package com.zileanstdio.chatapp.DataSource.remote;
 
-
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -89,6 +89,48 @@ public class FirestoreDBSource {
                 }
             });
 
+            emitter.setCancellable(registration::remove);
+        }, BackpressureStrategy.BUFFER);
+    }
+
+    public Flowable<User> searchUserFromUserName(final String keyword) {
+        return Flowable.create(emitter -> {
+            final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .whereEqualTo("userName", keyword)
+                    .addSnapshotListener((value, error) -> {
+                        if (error != null) {
+                            emitter.onError(error);
+                        }
+                        if (value != null) {
+                            for (DocumentChange documentChange : value.getDocumentChanges()) {
+                                if (documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                    User user = documentChange.getDocument().toObject(User.class);
+                                    emitter.onNext(user);
+                                }
+                            }
+                        }
+                    });
+            emitter.setCancellable(registration::remove);
+        }, BackpressureStrategy.BUFFER);
+    }
+
+    public Flowable<User> searchUserFromPhoneNumber(final String phoneNumberHashed) {
+        return Flowable.create(emitter -> {
+            final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .whereEqualTo(FieldPath.documentId(), phoneNumberHashed)
+                    .addSnapshotListener((value, error) -> {
+                        if (error != null) {
+                            emitter.onError(error);
+                        }
+                        if (value != null) {
+                            for(DocumentChange documentChange : value.getDocumentChanges()) {
+                                if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                    User user = documentChange.getDocument().toObject(User.class);
+                                    emitter.onNext(user);
+                                }
+                            }
+                        }
+                    });
             emitter.setCancellable(registration::remove);
         }, BackpressureStrategy.BUFFER);
     }

@@ -73,7 +73,7 @@ public class ChatView extends BaseFragment<ChatViewModel> {
         ((MainActivity) baseActivity).getViewModel().getUserInfo().observe(baseActivity, user -> {
             Debug.log("getUserInfo", user.toString());
             viewModel.getCurrentUser().setValue(user);
-            if(user.getConversationList().size() > 0)
+            if ((user.getConversationList() != null) && (user.getConversationList().size() > 0))
                 viewModel.loadRecentConversations(user.getConversationList());
             else
                 hideShimmer();

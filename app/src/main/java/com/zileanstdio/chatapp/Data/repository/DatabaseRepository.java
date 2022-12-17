@@ -35,4 +35,12 @@ public class DatabaseRepository {
     public Flowable<QuerySnapshot> getMessageList(final String uid) {
         return firestoreDBSource.getMessageList(uid);
     }
+
+    public Flowable<User> searchUserFromUserName(String keyword) {
+        return firestoreDBSource.searchUserFromUserName(keyword);
+    }
+
+    public Flowable<User> searchUserFromPhoneNumber(String phoneNumberHashed) {
+        return firestoreDBSource.searchUserFromPhoneNumber(phoneNumberHashed);
+    }
 }

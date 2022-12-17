@@ -67,6 +67,18 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        disposable.clear();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.clear();
+    }
+
+    @Override
     public void initAppBar() {
         super.initAppBar();
         setTitleToolbar("Đăng nhập");
@@ -123,7 +135,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private boolean validatePassword(String password) {
-        if (password.trim().isEmpty()) {
+        if (password.isEmpty()) {
             passwordEditText.getText().clear();
             passwordEditText.setSelection(0);
             isValidatePassword = false;
@@ -143,15 +155,15 @@ public class LoginActivity extends BaseActivity {
                         break;
                     case SUCCESS:
                         Toast.makeText(this, "Chào mừng đến với 'Zimess'", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, MainActivity.class));
-                        finish();
+                        Intent startMainActivity = new Intent(this, MainActivity.class);
+                        startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(startMainActivity);
                         break;
                     case ERROR:
                         closeLoadingDialog();
                         phoneNumberEditText.setEnabled(true);
                         passwordEditText.setEnabled(true);
                         Toast.makeText(this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
-                        Log.d("AAA", stateResource.message);
                         break;
                 }
             }
