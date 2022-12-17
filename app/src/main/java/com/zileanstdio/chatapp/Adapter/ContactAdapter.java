@@ -1,21 +1,14 @@
-package com.zileanstdio.chatapp.Ui.sync;
+package com.zileanstdio.chatapp.Adapter;
 
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,40 +20,35 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
-import com.jakewharton.rxbinding4.view.RxView;
 import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
-import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.R;
-import com.zileanstdio.chatapp.Utils.CipherUtils;
+import com.zileanstdio.chatapp.Ui.main.connections.contact.ContactViewModel;
 import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Debug;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.ViewHolder> {
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
+    private final String TAG = this.getClass().getSimpleName();
     private final Context context;
+    private final ContactViewModel viewModel;
+    public HashMap<String, Contact> stringHashMap = new HashMap<>();
+
+
     private final AsyncListDiffer<ContactWrapInfo> infoAsyncListDiffer;
-    private final SyncContactViewModel viewModel;
-    private final HashMap<String, Boolean> sentRequestToUser = new HashMap<>();
 
-    public HashMap<String, Boolean> getSentRequestToUser() {
-        return sentRequestToUser;
-    }
-
-    public SyncContactAdapter(Context context, SyncContactViewModel viewModel) {
+    public ContactAdapter(Context context, ContactViewModel viewModel) {
         this.context = context;
         this.viewModel = viewModel;
+
         DiffUtil.ItemCallback<ContactWrapInfo> diffCallback = new DiffUtil.ItemCallback<ContactWrapInfo>() {
 
             @Override
@@ -74,6 +62,20 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
             }
         };
         infoAsyncListDiffer = new AsyncListDiffer<>(this, diffCallback);
+    }
+
+    @NonNull
+    @Override
+    public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        View listItem = layoutInflater.inflate(R.layout.layout_contact_item_by_alphabet, parent, false);
+        return new ContactViewHolder(listItem);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ContactAdapter.ContactViewHolder holder, int position) {
+        final ContactWrapInfo contactWrapInfo = getItem(position);
+        holder.bindData(position, contactWrapInfo);
     }
 
     public void submitList(List<ContactWrapInfo> contactWrapInfoList) {
@@ -90,35 +92,8 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
     }
 
 
-    private List<Contact> contacts;
-
-    HashMap<String, Contact> stringHashMap = new HashMap<>();
-
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void setFilteredList(List<Contact> filterList){
-        this.contacts = filterList;
-        notifyDataSetChanged();
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View listItem = layoutInflater.inflate(R.layout.layout_contact_item_by_alphabet, parent, false);
-        return new ViewHolder(listItem);
-    }
-
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        final ContactWrapInfo contactWrapInfo = getItem(position);
-        holder.bindData(position, contactWrapInfo);
-
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
+    public class ContactViewHolder extends RecyclerView.ViewHolder {
+        private final MaterialCardView cvContactItem;
         private final ConstraintLayout ctlItemContact;
         private final MaterialTextView txvUserName;
         private final MaterialTextView txvContactName;
@@ -129,9 +104,9 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         private final MaterialButton btnAddFriend;
         private final MaterialTextView txvIsFriend;
 
-
-        public ViewHolder(View itemView) {
+        public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
+            cvContactItem = itemView.findViewById(R.id.cv_contact_item);
             ctlItemContact=itemView.findViewById(R.id.ctl_item_contact);
             imvAvatar = itemView.findViewById(R.id.imv_avatar);
             txvUserName = itemView.findViewById(R.id.tv_user_name);
@@ -141,31 +116,14 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
             btnVideoCall = itemView.findViewById(R.id.btn_video_call);
             btnAddFriend = itemView.findViewById(R.id.btn_add_friend);
             txvIsFriend = itemView.findViewById(R.id.txv_in_friend_relationship);
-            btnCall.setVisibility(View.GONE);
-            btnVideoCall.setVisibility(View.GONE);
+            txvIsFriend.setVisibility(View.GONE);
+            btnAddFriend.setVisibility(View.GONE);
+            btnVideoCall.setVisibility(View.VISIBLE);
+            btnCall.setVisibility(View.VISIBLE);
         }
 
         public void bindData(int position, ContactWrapInfo contactWrapInfo) {
             String alphabet = String.valueOf(Common.removeAccent(String.valueOf(contactWrapInfo.getContact().getContactName())).charAt(0)).toUpperCase(Locale.ROOT);
-            if(contactWrapInfo.getContact().getRelationship() == -2) {
-                btnAddFriend.setEnabled(true);
-                btnAddFriend.setText("Kết bạn");
-            }else
-            if(contactWrapInfo.getContact().getRelationship() == -1) {
-                txvIsFriend.setVisibility(View.GONE);
-                txvIsFriend.setText("");
-                btnAddFriend.setEnabled(false);
-                btnAddFriend.setText("Đã gửi");
-                btnAddFriend.setVisibility(View.VISIBLE);
-            } else if(contactWrapInfo.getContact().getRelationship() == 1) {
-                txvIsFriend.setText("Đã là bạn");
-                txvIsFriend.setVisibility(View.VISIBLE);
-                btnAddFriend.setVisibility(View.GONE);
-            } else if(contactWrapInfo.getContact().getRelationship() == 0){
-                txvIsFriend.setText("Đang chờ kết bạn");
-                txvIsFriend.setVisibility(View.VISIBLE);
-                btnAddFriend.setVisibility(View.GONE);
-            }
             if(stringHashMap.containsKey(alphabet) ) {
                 if(stringHashMap.get(alphabet).getNumberPhone().equals(contactWrapInfo.getUser().getPhoneNumber())) {
                     txvAlphabetHeader.setText(alphabet);
@@ -206,19 +164,8 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                         })
                         .into(imvAvatar);
             }
-            btnAddFriend.setOnClickListener(v -> {
-                viewModel.getNavigator().sendFriendRequest(
-                        position,
-                        contactWrapInfo,
-                        viewModel.getCurrentUser().getValue().getPhoneNumber()
-                        );
 
-            });
-
+            cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(null, contactWrapInfo.getContact(), contactWrapInfo.getUser()));
         }
     }
-
-
-
-
 }

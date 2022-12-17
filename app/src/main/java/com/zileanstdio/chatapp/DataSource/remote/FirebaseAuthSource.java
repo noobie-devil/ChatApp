@@ -23,6 +23,7 @@ import com.zileanstdio.chatapp.Exceptions.UserException;
 import com.zileanstdio.chatapp.Exceptions.VerificationException;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Constants;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.Date;
 import java.util.Objects;
@@ -156,6 +157,7 @@ public class FirebaseAuthSource {
 
             // Kiểm tra người dùng đăng nhập
             if ((user == null) || (user.getEmail() == null)) {
+                Debug.log("checkLoginUser", "UNKNOWN_USER");
                 emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
                         "Vui lòng đăng nhập tài khoản"));
             } else {
@@ -163,9 +165,11 @@ public class FirebaseAuthSource {
                 firebaseAuth.fetchSignInMethodsForEmail(user.getEmail()).addOnCompleteListener(task -> {
                     if (task.getResult().getSignInMethods() != null && task.getResult().getSignInMethods().isEmpty()) {
                         firebaseAuth.signOut();
+                        Debug.log("checkLoginUser", "UNKNOWN_USER");
                         emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
                                 "Không thể xác nhận tài khoản.\nVui lòng đăng nhập lại!"));
                     } else {
+                        Debug.log("checkLoginUser", "SUCCESS");
                         emitter.onComplete();
                     }
                 });

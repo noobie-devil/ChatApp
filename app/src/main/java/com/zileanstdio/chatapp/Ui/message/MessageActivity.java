@@ -119,10 +119,10 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
             if(contactProfile != null && contactProfile.getUserName() != null) {
                 Debug.log("contactProfile", contactProfile.toString());
                 // Use for testing
-                viewModel.getLatestInfoContact("2llkhB24tuTqbwg1fL6y")
-                        .observe(this, user -> {
-                            viewModel.getContactProfileLiveData().setValue(contactProfile);
-                        });
+                viewModel.getLatestInfoContact(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()))
+                    .observe(this, user -> {
+                        viewModel.getContactProfileLiveData().setValue(contactProfile);
+                    });
                 // Use for release
 //                viewModel.getLatestInfoContact(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()))
 //                        .observe(this, user -> {
@@ -156,7 +156,7 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
                                 add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
                             }});
                             conversation.setLastMessage(edtMessage.getText().toString().trim());
-                            currentConversationWrapper.setConversation(conversation);
+                            currentConversationWrapper = new ConversationWrapper(null, conversation);
                         }
                         Message message = new Message(currentUid,
                                         Conversation.Type.TEXT.label,

@@ -2,9 +2,11 @@ package com.zileanstdio.chatapp.Ui.sync;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,38 +16,58 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textview.MaterialTextView;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
+import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Ui.main.connections.chat.ChatViewModel;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Constants;
+import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
+
+public class SyncContactActivity extends BaseActivity<SyncContactViewModel> implements SyncContactViewModel.Navigator {
+    public static final String ARG_CURRENT_USER = "current_user";
     //private FragmentTransaction fragmentTransaction;
 
     private RecyclerView rcvSyncContact;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ShimmerFrameLayout shimmer;
 
-
-    SyncContactAdapter contactAdapter = new SyncContactAdapter();
+    private SyncContactAdapter contactAdapter;
     private List<Contact> contacts;
     private SearchView svContact;
     private MaterialTextView txvNoResult;
-
-
+    private final BehaviorSubject<Boolean> shimmerListener = BehaviorSubject.createDefault(true);
 
 
     @Override
     public SyncContactViewModel getViewModel() {
-        return null;
+        if(viewModel != null) {
+            return viewModel;
+        }
+        viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(SyncContactViewModel.class);
+        return viewModel;
     }
 
     @Override
@@ -67,22 +89,103 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        svContact=findViewById(R.id.sv_contact);
-        txvNoResult=findViewById(R.id.tv_no_result_contact);
+        viewModel.setNavigator(this);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        shimmer = findViewById(R.id.shimmer_view_sync_contact);
+        svContact = findViewById(R.id.sv_contact);
+        txvNoResult = findViewById(R.id.tv_no_result_contact);
+        rcvSyncContact = findViewById(R.id.rcv_add_contact);
+        rcvSyncContact.setLayoutManager(new LinearLayoutManager(this));
+        rcvSyncContact.setItemAnimator(new DefaultItemAnimator());
+        contactAdapter = new SyncContactAdapter(this, viewModel);
+        rcvSyncContact.setAdapter(contactAdapter);
         initAppBar();
 
-        svContact.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//        svContact.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String s) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                filterList(newText);
+//                return false;
+//            }
+//        });
+
+        if(getIntent() != null && getIntent().hasExtra(ARG_CURRENT_USER)) {
+            User user = (User) getIntent().getSerializableExtra(ARG_CURRENT_USER);
+            if(user != null) {
+                viewModel.getCurrentUser().setValue(user);
+            } else {
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle("Error")
+                        .setMessage("Không tìm thấy người dùng hiện tại")
+                        .setPositiveButton("Thoát", (dialog, which) -> {
+                            finish();
+                            dialog.dismiss();
+                        }).show();
+            }
+        } else {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Error")
+                    .setMessage("Không tìm thấy người dùng hiện tại")
+                    .setPositiveButton("Thoát", (dialog, which) -> {
+                        finish();
+                        dialog.dismiss();
+                    }).show();
+        }
+
+        shimmerListener.subscribe(new io.reactivex.rxjava3.core.Observer<Boolean>() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
+            public void onSubscribe(@NonNull Disposable d) {
+                viewModel.getDisposable().add(d);
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                filterList(newText);
-                return false;
+            public void onNext(@NonNull Boolean aBoolean) {
+                if(aBoolean != null && aBoolean) {
+                    showShimmer();
+                } else {
+                    hideShimmer();
+                }
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
             }
         });
+
+        viewModel.userSyncFromContactLiveData.observe(this, stringContactWrapInfoHashMap -> {
+            Debug.log("userSyncFromContactLiveData", String.valueOf(stringContactWrapInfoHashMap.size()));
+            viewModel.cacheUserSyncFromContact.putAll(stringContactWrapInfoHashMap);
+            shimmerListener.onNext(false);
+            if(stringContactWrapInfoHashMap.size() == 0) {
+                findViewById(R.id.tv_no_result_contact).setVisibility(View.VISIBLE);
+                shimmerListener.onNext(false);
+
+            } else {
+                findViewById(R.id.tv_no_result_contact).setVisibility(View.GONE);
+                contactAdapter.stringHashMap.clear();
+                contactAdapter.submitList(new ArrayList<>(stringContactWrapInfoHashMap.values()));
+                shimmerListener.onNext(false);
+            }
+
+        });
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            if(viewModel.getLocalContact().getValue() != null) {
+                shimmerListener.onNext(true);
+                sync(viewModel.getLocalContact().getValue());
+            }
+        });
+        viewModel.getLocalContact().observe(this, this::sync);
 
         PERMISSIONS_NOT_GRANTED = new HashMap<Integer, String>() {{
             put(Constants.READ_CONTACTS_CODE, Manifest.permission.READ_CONTACTS);
@@ -91,7 +194,7 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
         observablePermissionsData.setValue(false);
 
         final Observer<Boolean> observerPermissionsNotGranted = isValid -> {
-            Log.d(TAG, "test");
+            Debug.log(TAG, "SyncContactActivity:observerPermissionNotGranted: " + isValid);
             if(isValid) {
                 run();
             }
@@ -100,23 +203,70 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
         observablePermissionsData.observe(this, observerPermissionsNotGranted);
 
         run();
-        contacts=getContactList();
-        initView();
-        //svContact.clearFocus();
+        svContact.clearFocus();
     }
 
-    private void initView() {
+    private void sync(HashMap<String, String> localContact) {
+        if(viewModel.getCurrentUser().getValue() != null) {
+            User currentUser = viewModel.getCurrentUser().getValue();
+            String uid = CipherUtils.Hash.sha256(currentUser.getPhoneNumber());
+            List<HashMap<String, String>> hashMapList = new ArrayList<>();
+            int maxSize = 1;
+            HashMap<String, String> temp = new HashMap<>();
+            for(String key : localContact.keySet()) {
+                temp.put(key, localContact.get(key));
+                if(maxSize % 10 == 0) {
+                    hashMapList.add(new HashMap<String, String>(){{putAll(temp);}});
+                    temp.clear();
+                } else {
+                    if(maxSize == localContact.size()) {
+                        hashMapList.add(new HashMap<String, String>(){{putAll(temp);}});
+                        temp.clear();
+                    }
+                }
+                maxSize++;
+            }
+            temp.clear();
+            for(HashMap<String, String> hashMap : hashMapList) {
+                viewModel.syncLocalContact(hashMap, uid);
+            }
+        } else {
+            notFoundCurrentUser();
+        }
+    }
 
-        //
-        rcvSyncContact = findViewById(R.id.rcv_add_contact);
-        rcvSyncContact.setHasFixedSize(true);
-        rcvSyncContact.setLayoutManager(new LinearLayoutManager(this));
-        rcvSyncContact.setItemAnimator(new DefaultItemAnimator());
+    private void notFoundCurrentUser() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Error")
+                .setMessage("Không tìm thấy người dùng hiện tại")
+                .setPositiveButton("Thoát", (dialog, which) -> {
+                    finish();
+                    dialog.dismiss();
+                }).show();
+    }
 
-        Collections.sort(contacts, Comparator.comparing(contact -> Common.removeAccent(contact.getContactName()).toLowerCase()));
-        contactAdapter.setContacts(contacts);
-        rcvSyncContact.setAdapter(contactAdapter);
+//    private void initView() {
+//        rcvSyncContact = findViewById(R.id.rcv_add_contact);
+//        rcvSyncContact.setLayoutManager(new LinearLayoutManager(this));
+//        rcvSyncContact.setItemAnimator(new DefaultItemAnimator());
+//
+//        Collections.sort(contacts, Comparator.comparing(contact -> Common.removeAccent(contact.getContactName()).toLowerCase()));
+//        contactAdapter.setContacts(contacts);
+//        rcvSyncContact.setAdapter(contactAdapter);
+//
+//    }
 
+
+    public void showShimmer() {
+        rcvSyncContact.setVisibility(View.GONE);
+        shimmer.setVisibility(View.VISIBLE);
+        shimmer.startShimmer();
+    }
+    public void hideShimmer() {
+        rcvSyncContact.setVisibility(View.VISIBLE);
+        shimmer.setVisibility(View.GONE);
+        shimmer.stopShimmer();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -128,9 +278,10 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
 
     void run() {
         if(handlePermissionsInitial(PERMISSIONS_NOT_GRANTED)) {
-            for(Contact contact: getContactList()) {
-                Log.d(TAG, contact.toString());
-            }
+            getContactList();
+//            for(Contact contact: getContactList()) {
+//                Log.d(TAG, contact.toString());
+//            }
         }
     }
 
@@ -142,8 +293,52 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
     }
 
 
-    private List<Contact> getContactList() {
+//    private List<Contact> getContactList() {
+//        Cursor cursor = null;
+//        List<Contact> localContact = new ArrayList<>();
+//
+//        ContentResolver contentResolver = getContentResolver();
+//        try {
+//            cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+//        } catch (Exception e) {
+//            Log.d(TAG + ":getContactList", e.getMessage());
+//        }
+//        if(cursor != null) {
+//
+//            if (cursor.getCount() > 0) {
+//                while (cursor.moveToNext()) {
+//                    Contact contact = new Contact();
+//
+//                    @SuppressLint("Range") String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+//                    @SuppressLint("Range") String contactDisplayName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//                    @SuppressLint("Range") int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)));
+//                    contact.setContactName(contactDisplayName);
+//                    if (hasPhoneNumber > 0) {
+//                        Cursor phoneCursor = contentResolver.query(
+//                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI
+//                                , null
+//                                , ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?"
+//                                , new String[]{contactId}
+//                                , null);
+//
+//                        while (phoneCursor.moveToNext()) {
+//                            @SuppressLint("Range") String phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//                            contact.setNumberPhone(phoneNumber);
+//                        }
+//                        phoneCursor.close();
+//                    }
+//
+//                    localContact.add(contact);
+//                }
+//                cursor.close();
+//            }
+//        }
+//        return localContact;
+//    }
+
+    private void getContactList() {
         Cursor cursor = null;
+        HashMap<String, String> hashMapContact = new HashMap<>();
         List<Contact> localContact = new ArrayList<>();
 
         ContentResolver contentResolver = getContentResolver();
@@ -176,13 +371,21 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
                         }
                         phoneCursor.close();
                     }
-
-                    localContact.add(contact);
+                    Debug.log("Local contact", contact.toString());
+                    hashMapContact.put(contact.getNumberPhone(), contact.getContactName());
                 }
                 cursor.close();
             }
         }
-        return localContact;
+        if(viewModel.getCurrentUser().getValue() != null) {
+            try {
+                hashMapContact.remove(viewModel.getCurrentUser().getValue().getPhoneNumber());
+            } catch (Exception e) {
+                Debug.log(e.getMessage() != null ? e.getMessage() : "Unknown error");
+            }
+
+        }
+        viewModel.getLocalContact().setValue(hashMapContact);
     }
 
 
@@ -204,5 +407,25 @@ public class SyncContactActivity extends BaseActivity<SyncContactViewModel> {
             txvNoResult.setVisibility(View.GONE);
         }
 
+    }
+
+    @Override
+    public void sendFriendRequest(int position, ContactWrapInfo contactWrapInfo, String sender) {
+        contactWrapInfo.getContact().setRelationship(-1);
+        viewModel.cacheUserSyncFromContact.put(contactWrapInfo.getContact().getNumberPhone(), contactWrapInfo);
+        contactAdapter.submitList(new ArrayList<>(viewModel.cacheUserSyncFromContact.values()));
+        contactAdapter.notifyItemChanged(position);
+        viewModel.sendFriendRequest(contactWrapInfo, sender).observe(this, aBoolean -> {
+            if(aBoolean) {
+                Toast.makeText(this, "Gửi kết bạn thành công", Toast.LENGTH_SHORT).show();
+            } else {
+                contactWrapInfo.getContact().setRelationship(-2);
+                viewModel.cacheUserSyncFromContact.put(contactWrapInfo.getContact().getNumberPhone(), contactWrapInfo);
+                contactAdapter.submitList(new ArrayList<>(viewModel.cacheUserSyncFromContact.values()));
+                contactAdapter.notifyItemChanged(position);
+                Toast.makeText(this, "Đã xảy ra lỗi, thử lại sau", Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 }

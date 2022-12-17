@@ -36,6 +36,7 @@ public class Constants {
     // TODO: 12/11/2022
     public static final String KEY_MODIFIED_AT = "modifiedAt";
     public static final String KEY_COLLECTION_CONVERSATION = "Conversation";
+    public static final String KEY_COLLECTION_FRIEND_REQUEST = "FriendRequest";
 
 
 }

@@ -5,9 +5,12 @@
     android:layout_height="wrap_content"
     style="@style/Widget.Material3.CardView.Outlined"
     app:cardCornerRadius="0dp"
+    android:id="@+id/cv_contact_item"
     app:strokeWidth="0dp"
     app:contentPaddingLeft="@dimen/_10sdp"
     app:contentPaddingTop="@dimen/_5sdp"
+    android:clickable="true"
+    android:focusable="true"
 
     >
     <!--    <com.google.android.material.textview.MaterialTextView-->
@@ -68,8 +71,8 @@
             app:layout_constraintTop_toBottomOf="@id/tv_alphabet"
             app:layout_constraintLeft_toRightOf="@id/imv_avatar"
 
-            app:layout_constraintWidth_percent="0.61"
-            app:layout_constraintDimensionRatio="3.5:1"
+            app:layout_constraintWidth_percent="0.49"
+            app:layout_constraintDimensionRatio="2.7222:1"
             android:gravity="center"
             android:paddingStart="@dimen/_10sdp"
             android:paddingEnd="@dimen/_10sdp"
@@ -119,9 +122,9 @@
             app:layout_constraintStart_toEndOf="@id/view_content"
             app:layout_constraintTop_toBottomOf="@id/tv_alphabet"
             app:layout_constraintLeft_toRightOf="@id/view_content"
-            app:layout_constraintWidth_percent="0.18"
+            app:layout_constraintWidth_percent="0.3"
 
-            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintDimensionRatio="1.6667:1"
             android:weightSum="1"
             >
             <com.google.android.material.button.MaterialButton
@@ -138,6 +141,7 @@
                 app:iconSize="@dimen/_15sdp"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:background="@android:color/transparent"
+                android:visibility="gone"
                 />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_video_call"
@@ -153,6 +157,28 @@
                 app:iconSize="@dimen/_15sdp"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:background="@android:color/transparent"
+                android:visibility="gone"
+                />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_friend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kết bạn"
+                android:layout_gravity="center"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:visibility="visible"
+                android:backgroundTint="?attr/colorOnTertiary"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txv_in_friend_relationship"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đã là bạn"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/_12ssp"
+                android:visibility="gone"
                 />
         </LinearLayout>
 
