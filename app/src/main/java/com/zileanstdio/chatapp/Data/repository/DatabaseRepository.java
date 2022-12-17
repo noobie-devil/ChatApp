@@ -47,6 +47,14 @@ public class DatabaseRepository {
         return firestoreDBSource.getMessageList(uid);
     }
 
+    public Flowable<User> searchUserFromUserName(String keyword) {
+        return firestoreDBSource.searchUserFromUserName(keyword);
+    }
+
+    public Flowable<User> searchUserFromPhoneNumber(String phoneNumberHashed) {
+        return firestoreDBSource.searchUserFromPhoneNumber(phoneNumberHashed);
+    }
+
     public Completable sendMessage(ConversationWrapper conversationWrapper, Message message) {
         return firestoreDBSource.sendMessage(conversationWrapper, message);
     }

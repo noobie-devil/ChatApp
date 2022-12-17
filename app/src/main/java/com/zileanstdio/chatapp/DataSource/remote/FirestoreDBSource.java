@@ -1,6 +1,5 @@
 package com.zileanstdio.chatapp.DataSource.remote;
 
-
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -162,12 +161,12 @@ public class FirestoreDBSource {
             final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
                     .whereEqualTo("userName", keyword)
                     .addSnapshotListener((value, error) -> {
-                        if(error != null) {
+                        if (error != null) {
                             emitter.onError(error);
                         }
-                        if(value != null) {
-                            for(DocumentChange documentChange : value.getDocumentChanges()) {
-                                if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                        if (value != null) {
+                            for (DocumentChange documentChange : value.getDocumentChanges()) {
+                                if (documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
                                     User user = documentChange.getDocument().toObject(User.class);
                                     emitter.onNext(user);
                                 }
@@ -177,15 +176,16 @@ public class FirestoreDBSource {
             emitter.setCancellable(registration::remove);
         }, BackpressureStrategy.BUFFER);
     }
+
     public Flowable<User> searchUserFromPhoneNumber(final String phoneNumberHashed) {
         return Flowable.create(emitter -> {
             final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
                     .whereEqualTo(FieldPath.documentId(), phoneNumberHashed)
                     .addSnapshotListener((value, error) -> {
-                        if(error != null) {
+                        if (error != null) {
                             emitter.onError(error);
                         }
-                        if(value != null) {
+                        if (value != null) {
                             for(DocumentChange documentChange : value.getDocumentChanges()) {
                                 if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
                                     User user = documentChange.getDocument().toObject(User.class);
@@ -197,6 +197,9 @@ public class FirestoreDBSource {
             emitter.setCancellable(registration::remove);
         }, BackpressureStrategy.BUFFER);
     }
+
+}
+
     public Single<Contact> checkExistContact(final String uid, final String contactUid) {
         return Single.create(emitter -> {
             firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
@@ -355,3 +358,4 @@ public class FirestoreDBSource {
         });
     }
 }
+

@@ -9,6 +9,7 @@ import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
 import com.zileanstdio.chatapp.Data.repository.DatabaseRepository;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.ArrayList;
@@ -29,16 +30,24 @@ public class MainViewModel extends ViewModel {
     final AuthRepository authRepository;
     final CompositeDisposable disposable = new CompositeDisposable();
     final MediatorLiveData<User> currentUserInfo = new MediatorLiveData<>();
-    final String uid;
-    final MutableLiveData<List<Contact>> listMutableLiveData = new MutableLiveData<>();
+
+    //final String uid;
+    //final MutableLiveData<List<Contact>> listMutableLiveData = new MutableLiveData<>();
 
     @Inject
     public MainViewModel(DatabaseRepository databaseRepository, AuthRepository authRepository) {
         this.databaseRepository = databaseRepository;
         this.authRepository = authRepository;
-        uid = authRepository.getCurrentFirebaseUser().getUid();
-        loadUserInfo("1bee7ac8a7cddc6bbfedb997da4b4decb50542fb8a6169b6ba31865eedba2105");
-        loadContacts(uid);
+
+        String id = authRepository.getCurrentFirebaseUser().getEmail();
+        if (id != null) {
+            id = id.substring(0, id.indexOf('@'));
+        }
+        loadUserInfo(CipherUtils.Hash.sha256(id));
+
+        //uid = authRepository.getCurrentFirebaseUser().getUid();
+        //loadUserInfo("1bee7ac8a7cddc6bbfedb997da4b4decb50542fb8a6169b6ba31865eedba2105");
+        //loadContacts(uid);
     }
 
     public MutableLiveData<List<Contact>> getListMutableLiveData() {
@@ -78,8 +87,8 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
-    private void loadUserInfo(String uid) {
-        databaseRepository.getUserInfo(uid)
+    public void loadUserInfo(String id) {
+        databaseRepository.getUserInfo(id)
                 .subscribeOn(Schedulers.io())
                 .toObservable()
                 .subscribe(new Observer<User>() {
@@ -104,6 +113,7 @@ public class MainViewModel extends ViewModel {
                     }
                 });
     }
+
     public LiveData<User> getUserInfo() {
         return currentUserInfo;
     }
@@ -114,4 +124,3 @@ public class MainViewModel extends ViewModel {
         disposable.clear();
     }
 }
-

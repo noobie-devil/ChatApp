@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -17,13 +19,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
+import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.main.connections.MainViewPagerAdapter;
+import com.zileanstdio.chatapp.Ui.search.SearchActivity;
 import com.zileanstdio.chatapp.Utils.Debug;
 
 public class MainActivity extends BaseActivity<MainViewModel> {
     private BottomNavigationView bottomNavigationView;
     private ViewPager2 viewPager2;
+
+    private User currentUser = null;
 
     @Override
     public MainViewModel getViewModel() {
@@ -56,6 +62,14 @@ public class MainActivity extends BaseActivity<MainViewModel> {
         setNavigationIcon(R.drawable.ic_magnifying_glass_light);
         setDisplayHomeAsUpEnabled(true);
         setDisplayShowHomeEnabled(false);
+        toolbar.setNavigationOnClickListener(v -> {
+            if (currentUser != null) {
+                Intent startSearchActivity = new Intent(this, SearchActivity.class);
+                startSearchActivity.putExtra("userName", currentUser.getUserName());
+                startSearchActivity.putExtra("phoneNumber", currentUser.getPhoneNumber());
+                startActivity(startSearchActivity);
+            }
+        });
     }
 
     @Override
@@ -96,14 +110,13 @@ public class MainActivity extends BaseActivity<MainViewModel> {
             return true;
         });
 
-//        viewModel.getUserInfo().observe(this, user -> {
-//            Debug.log("getUserInfo", user.toString());
-//        });
+
+        viewModel.getUserInfo().observe(this, user -> currentUser = user);
+
         viewModel.getListMutableLiveData().observe(this, contacts -> {
 
         });
     }
-
 
     @Override
     public void onClick(View v) {

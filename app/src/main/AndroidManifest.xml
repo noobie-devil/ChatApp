@@ -26,8 +26,7 @@
             android:exported="false" />
         <activity
             android:name=".Ui.auth.AuthActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".Ui.login.LoginActivity"
             android:exported="false"
@@ -48,12 +47,15 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
         <activity
             android:name=".Ui.message.MessageActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true" />
+        <activity
+            android:name=".Ui.search.SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Ui.change.ChangePasswordActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

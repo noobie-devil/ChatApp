@@ -38,5 +38,4 @@ public class Constants {
     public static final String KEY_COLLECTION_CONVERSATION = "Conversation";
     public static final String KEY_COLLECTION_FRIEND_REQUEST = "FriendRequest";
 
-
 }

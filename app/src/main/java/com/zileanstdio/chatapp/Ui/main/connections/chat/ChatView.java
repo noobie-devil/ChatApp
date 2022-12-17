@@ -90,6 +90,12 @@ public class ChatView extends BaseFragment<ChatViewModel> implements ChatViewMod
         ((MainActivity) baseActivity).getViewModel().getUserInfo().observe(baseActivity, user -> {
             Debug.log("getUserInfo", user.toString());
             viewModel.getCurrentUser().setValue(user);
+
+            if ((user.getConversationList() != null) && (user.getConversationList().size() > 0))
+                viewModel.loadRecentConversations(user.getConversationList());
+            else
+                hideShimmer();
+
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {

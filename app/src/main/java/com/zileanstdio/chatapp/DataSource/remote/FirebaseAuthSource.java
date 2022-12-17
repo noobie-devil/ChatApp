@@ -8,6 +8,8 @@ import androidx.fragment.app.FragmentActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
@@ -174,6 +176,40 @@ public class FirebaseAuthSource {
                     }
                 });
             }
+        });
+    }
+
+    public Completable logout() {
+        return Completable.create(emitter -> {
+            FirebaseUser user = getCurrentFirebaseUser();
+
+            if ((user == null) || (user.getEmail() == null)) {
+                emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER, "Đã có lỗi xảy ra!"));
+            } else {
+                firebaseAuth.signOut();
+                emitter.onComplete();
+            }
+        });
+    }
+
+    public Completable updateUserName(String userName, String numberPhone) {
+        return Completable.create(emitter -> firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                .document(CipherUtils.Hash.sha256(numberPhone))
+                .update("userName", userName)
+                .addOnSuccessListener(command -> emitter.onComplete())
+                .addOnFailureListener(emitter::onError));
+    }
+
+    public Completable changePassword(String email, String passwordOld, String passwordNew) {
+        return Completable.create(emitter -> {
+            FirebaseUser user = getCurrentFirebaseUser();
+
+            AuthCredential authCredential = EmailAuthProvider.getCredential(email, passwordOld);
+            user.reauthenticate(authCredential)
+                    .addOnSuccessListener(command -> user.updatePassword(passwordNew)
+                            .addOnSuccessListener(command1 -> emitter.onComplete())
+                            .addOnFailureListener(e -> emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER, "Không thể cập nhật mật khẩu mới")))
+                    ).addOnFailureListener(e -> emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER, "Mật khẩu không đúng")));
         });
     }
 }

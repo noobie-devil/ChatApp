@@ -55,4 +55,16 @@ public class AuthRepository {
     public FirebaseUser getCurrentFirebaseUser() {
         return this.firebaseAuthSource.getCurrentFirebaseUser();
     }
+
+    public Completable logout() {
+        return this.firebaseAuthSource.logout();
+    }
+
+    public Completable updateUserName(String userName, String phoneNumber) {
+        return this.firebaseAuthSource.updateUserName(userName, phoneNumber);
+    }
+
+    public Completable changePassword(String email, String passwordOld, String passwordNew) {
+        return this.firebaseAuthSource.changePassword(email, passwordOld, passwordNew);
+    }
 }
