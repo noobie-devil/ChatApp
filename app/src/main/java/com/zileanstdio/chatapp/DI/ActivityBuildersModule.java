@@ -11,6 +11,7 @@ import com.zileanstdio.chatapp.DI.message.MessageViewModelModule;
 import com.zileanstdio.chatapp.DI.register.RegisterFragmentBuildersModule;
 import com.zileanstdio.chatapp.DI.register.RegisterModule;
 import com.zileanstdio.chatapp.DI.register.RegisterViewModelModule;
+import com.zileanstdio.chatapp.DI.request.ListRequestViewModelModule;
 import com.zileanstdio.chatapp.DI.search.SearchViewModelModule;
 import com.zileanstdio.chatapp.DI.start.StartViewModelModule;
 import com.zileanstdio.chatapp.DI.sync.SyncContactViewModelModule;
@@ -22,6 +23,7 @@ import com.zileanstdio.chatapp.Ui.auth.AuthActivity;
 import com.zileanstdio.chatapp.Ui.login.LoginActivity;
 import com.zileanstdio.chatapp.Ui.message.MessageActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
+import com.zileanstdio.chatapp.Ui.request.ListRequestActivity;
 import com.zileanstdio.chatapp.Ui.search.SearchActivity;
 import com.zileanstdio.chatapp.Ui.start.StartActivity;
 import com.zileanstdio.chatapp.Ui.sync.SyncContactActivity;
@@ -89,4 +91,7 @@ public abstract class ActivityBuildersModule {
             OutgoingCallViewModelModule.class
     })
     abstract OutgoingCallActivity contributeOutgoingCallActivity();
+    
+    @ContributesAndroidInjector(modules = ListRequestViewModelModule.class)
+    abstract ListRequestActivity contributeListRequestActivity();
 }

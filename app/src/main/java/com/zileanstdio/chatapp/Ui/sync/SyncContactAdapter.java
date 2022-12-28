@@ -146,6 +146,7 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         }
 
         public void bindData(int position, ContactWrapInfo contactWrapInfo) {
+            Debug.log("SyncContactAdapter:bindData", contactWrapInfo.toString());
             String alphabet = String.valueOf(Common.removeAccent(String.valueOf(contactWrapInfo.getContact().getContactName())).charAt(0)).toUpperCase(Locale.ROOT);
             if(contactWrapInfo.getContact().getRelationship() == -2) {
                 btnAddFriend.setEnabled(true);

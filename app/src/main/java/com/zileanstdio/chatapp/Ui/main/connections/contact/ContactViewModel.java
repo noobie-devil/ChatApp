@@ -11,7 +11,9 @@ import com.zileanstdio.chatapp.Data.repository.DatabaseRepository;
 import com.zileanstdio.chatapp.Ui.main.connections.chat.ChatViewModel;
 import com.zileanstdio.chatapp.Utils.Debug;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -30,6 +32,13 @@ public class ContactViewModel extends ViewModel {
     private final MutableLiveData<HashMap<String, ContactWrapInfo>> contactWrapInfoLiveData = new MutableLiveData<>();
     private final HashMap<String, ContactWrapInfo> contactWrapInfoHashMap = new HashMap<>();
     private Navigator navigator;
+    private final List<String> conversationList = new ArrayList<>();
+    private final MutableLiveData<HashMap<String, String>> conversationIdHashMap = new MutableLiveData<>();
+    private List<ConversationWrapper> conversationsList = new ArrayList<>();
+
+    public List<ConversationWrapper> getConversationsList() {
+        return conversationsList;
+    }
 
     public void setNavigator(Navigator navigator) {
         this.navigator = navigator;
@@ -44,6 +53,10 @@ public class ContactViewModel extends ViewModel {
         this.databaseRepository = databaseRepository;
         this.disposable = new CompositeDisposable();
 
+    }
+
+    public MutableLiveData<HashMap<String, String>> getConversationIdHashMap() {
+        return conversationIdHashMap;
     }
 
     public CompositeDisposable getDisposable() {
@@ -72,8 +85,16 @@ public class ContactViewModel extends ViewModel {
                 @Override
                 public void onNext(@NonNull ContactWrapInfo contactWrapInfo) {
                     Debug.log("getContactWrapInfo:ViewModel", "onNext: " + contactWrapInfo.toString());
-                    contactWrapInfoHashMap.put(contactWrapInfo.getContact().getNumberPhone(), contactWrapInfo);
-                    contactWrapInfoLiveData.setValue(contactWrapInfoHashMap);
+                    if(contactWrapInfoHashMap.containsKey(contactWrapInfo.getContact().getNumberPhone()) &&
+                        contactWrapInfo.getContact().getRelationship() == -2
+                    ) {
+                        contactWrapInfoHashMap.remove(contactWrapInfo.getContact().getNumberPhone());
+                        contactWrapInfoLiveData.setValue(contactWrapInfoHashMap);
+                    } else {
+                        contactWrapInfoHashMap.put(contactWrapInfo.getContact().getNumberPhone(), contactWrapInfo);
+                        contactWrapInfoLiveData.setValue(contactWrapInfoHashMap);
+                    }
+
                 }
 
                 @Override
@@ -103,5 +124,7 @@ public class ContactViewModel extends ViewModel {
 
     public interface Navigator {
         public void navigateToMessage(ConversationWrapper conversationWrapper, Contact contact, User contactProfile);
+        public void showLoadingDialog();
+        public void closeLoadingDialog();
     }
 }

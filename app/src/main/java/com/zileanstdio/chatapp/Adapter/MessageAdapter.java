@@ -45,7 +45,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         @Override
         public boolean areContentsTheSame(@NonNull MessageWrapper oldItem, @NonNull MessageWrapper newItem) {
-            return oldItem.equals(newItem);
+            return Objects.equals(oldItem.getDocumentId(), newItem.getDocumentId()) && oldItem.getMessage().equals(newItem.getMessage());
         }
     };
 

@@ -10,8 +10,10 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.zileanstdio.chatapp.Data.model.Contact;
@@ -134,8 +136,8 @@ public class FirestoreDBSource {
         });
     }
 
-    public Completable sendMessage(final ConversationWrapper conversation, final Message message) {
-        return Completable.create(emitter -> {
+    public Single<ConversationWrapper> sendMessage(final ConversationWrapper conversation, final Message message) {
+        return Single.create(emitter -> {
             WriteBatch requestBatch = firebaseFirestore.batch();
             message.setSendAt(new Date());
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -143,6 +145,15 @@ public class FirestoreDBSource {
                     .document(conversation.getDocumentId() != null ? conversation.getDocumentId() : String.valueOf(timestamp.getTime()));
             DocumentReference messageReference = conversationReference.collection(Constants.KEY_COLLECTION_MESSAGE)
                     .document(String.valueOf(timestamp.getTime()));
+            if(conversation.getDocumentId() == null) {
+                DocumentReference senderReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                        .document(conversation.getConversation().getUserJoined().get(0));
+                DocumentReference receiverReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                        .document(conversation.getConversation().getUserJoined().get(1));
+                requestBatch.update(senderReference, Constants.KEY_CONVERSATION_LIST, FieldValue.arrayUnion(String.valueOf(timestamp.getTime())));
+                requestBatch.update(receiverReference, Constants.KEY_CONVERSATION_LIST, FieldValue.arrayUnion(String.valueOf(timestamp.getTime())));
+                conversation.setDocumentId(String.valueOf(timestamp.getTime()));
+            }
 //            DocumentReference senderReference =firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
 //                            .document(conversation.getConversation().getUserJoined().get(0))
 //                    .update();
@@ -150,7 +161,7 @@ public class FirestoreDBSource {
             requestBatch.set(messageReference, message);
             requestBatch.commit()
                     .addOnSuccessListener(command -> {
-                        emitter.onComplete();
+                        emitter.onSuccess(conversation);
                     })
                     .addOnFailureListener(emitter::onError);
         });
@@ -339,6 +350,7 @@ public class FirestoreDBSource {
 
     public Completable sendFriendRequest(final ContactWrapInfo contactWrapInfo, final String sender) {
         return Completable.create(emitter -> {
+            Debug.log("sendFriendRequest running");
             WriteBatch requestBatch = firebaseFirestore.batch();
             DocumentReference senderReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
                     .document(CipherUtils.Hash.sha256(sender))
@@ -363,6 +375,115 @@ public class FirestoreDBSource {
 
         });
     }
+
+    public Completable acceptRequest(final String uid, final String contactId) {
+        return Completable.create(emitter -> {
+            WriteBatch writeBatch = firebaseFirestore.batch();
+            DocumentReference receiverReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(uid)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .document(contactId);
+            DocumentReference senderReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(contactId)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .document(uid);
+            writeBatch.update(receiverReference, Constants.KEY_RELATION_SHIP, 1);
+            writeBatch.update(senderReference, Constants.KEY_RELATION_SHIP, 1);
+            writeBatch.commit()
+                    .addOnSuccessListener(command -> emitter.onComplete())
+                    .addOnFailureListener(emitter::onError);
+        });
+    }
+
+    public Completable denyRequest(final String uid, final String contactId) {
+        return Completable.create(emitter -> {
+            WriteBatch writeBatch = firebaseFirestore.batch();
+            DocumentReference receiverReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(uid)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .document(contactId);
+            DocumentReference senderReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(contactId)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .document(uid);
+            writeBatch.delete(receiverReference);
+            writeBatch.delete(senderReference);
+            writeBatch.commit()
+                    .addOnSuccessListener(command -> emitter.onComplete())
+                    .addOnFailureListener(emitter::onError);
+        });
+    }
+
+//    public Single<List<ContactWrapInfo>> getRequests(final String uid) {
+//        return Single.create(emitter -> {
+//            firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+//                    .document(uid)
+//                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+//                    .get()
+//                    .addOnSuccessListener(queryDocumentSnapshots -> {
+//                        List<ContactWrapInfo> infoList = new ArrayList<>();
+//                        if(queryDocumentSnapshots != null) {
+//                            for(DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+//                                Contact contact = snapshot.toObject(Contact.class);
+//                                firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+//                                        .document(CipherUtils.Hash.sha256(contact.getNumberPhone()))
+//                                        .get()
+//                                                .addOnSuccessListener(documentSnapshot -> {
+//                                                    if(documentSnapshot.exists()) {
+//                                                        User user = documentSnapshot.toObject(User.class);
+//
+//                                                    }
+//                                                })
+//                                infoList.add(snapshot.toObject())
+//                            }
+//                        }
+//                    })
+//        })
+//    }
+
+    public Flowable<ContactWrapInfo> listenRequest(final String uid) {
+        return Flowable.create(emitter -> {
+            final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(uid)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .addSnapshotListener((value, error) -> {
+                        if(error != null) {
+                            emitter.onError(error);
+                        }
+                        if(value != null) {
+                            for(DocumentChange documentChange : value.getDocumentChanges()) {
+                                if(documentChange.getType() == DocumentChange.Type.REMOVED) {
+                                    Contact contact = documentChange.getDocument().toObject(Contact.class);
+                                    contact.setRelationship(-2);
+                                    Debug.log("listenRequest", "DocumentChange REMOVED");
+                                    emitter.onNext(new ContactWrapInfo(contact, new User()));
+                                }
+                                else if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                    Contact contact = documentChange.getDocument().toObject(Contact.class);
+                                    Debug.log("listenRequest", contact.toString());
+                                    firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                                            .document(CipherUtils.Hash.sha256(contact.getNumberPhone()))
+                                            .get()
+                                            .addOnSuccessListener(documentSnapshot -> {
+                                                if(documentSnapshot.exists()) {
+                                                    User user = documentSnapshot.toObject(User.class);
+                                                    emitter.onNext(new ContactWrapInfo(contact, user));
+                                                } else {
+                                                    emitter.onNext(new ContactWrapInfo(contact, new User()));
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Debug.log("getContact", e.getMessage());
+                                                emitter.onNext(new ContactWrapInfo(contact, new User()));
+                                            });
+                                }
+                            }
+                        }
+                    });
+            emitter.setCancellable(registration::remove);
+        }, BackpressureStrategy.BUFFER);
+    }
+}
 
     public Completable sendCallMessage(final ConversationWrapper conversation, final Message message) {
         return Completable.create(emitter -> {

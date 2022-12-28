@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,9 +32,11 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
+import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.call.outgoing.OutgoingCallActivity;
 import com.zileanstdio.chatapp.Ui.main.connections.contact.ContactViewModel;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Debug;
 import com.zileanstdio.chatapp.Utils.Stringee;
@@ -41,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
@@ -171,8 +176,16 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                         })
                         .into(imvAvatar);
             }
-
-            cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(null, contactWrapInfo.getContact(), contactWrapInfo.getUser()));
+            AtomicReference<ConversationWrapper> conversationWrapper = new AtomicReference<>();
+            conversationWrapper.set(getConversation(contactWrapInfo));
+            viewModel.getNavigator().showLoadingDialog();
+            if(conversationWrapper.get() == null) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    conversationWrapper.set(getConversation(contactWrapInfo));
+                }, 5000);
+            }
+            viewModel.getNavigator().closeLoadingDialog();
+            cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(conversationWrapper.get(), contactWrapInfo.getContact(), contactWrapInfo.getUser()));
             btnCall.setOnClickListener(v -> {
                 if (contactWrapInfo.getUser().getPhoneNumber().trim().length() > 0) {
                     if (Stringee.client.isConnected()) {
@@ -202,6 +215,21 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                     }
                 }
             });
+        }
+        public ConversationWrapper getConversation(ContactWrapInfo contactWrapInfo) {
+            ConversationWrapper wrapper = null;
+            if(viewModel.getConversationsList().size() > 0) {
+                for(ConversationWrapper conversationWrapper : viewModel.getConversationsList()) {
+                    String uid = CipherUtils.Hash.sha256(contactWrapInfo.getContact().getNumberPhone());
+                    if(conversationWrapper.getConversation().getUserJoined().contains(uid)) {
+                        wrapper = conversationWrapper;
+                        break;
+                    }
+                }
+                return wrapper;
+            } else {
+                return wrapper;
+            }
         }
     }
 }

@@ -46,4 +46,27 @@
 
     </com.facebook.shimmer.ShimmerFrameLayout>
 
+    <LinearLayout
+        android:id="@+id/view_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/txv_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/ic_circle_info_solid"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:text="Danh sách trò chuyện trống"
+            app:iconGravity="textStart"
+            app:iconPadding="@dimen/_5sdp"
+            android:textSize="@dimen/_13ssp"
+            android:textColor="?attr/colorOutline"
+            app:iconTint="?attr/colorTertiaryContainer"
+            />
+
+    </LinearLayout>
+
 </FrameLayout>

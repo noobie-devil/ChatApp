@@ -25,9 +25,11 @@
             android:id="@+id/activity_main.bottom_navigation"
             style="@style/Widget.Material3.BottomNavigationView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/_60sdp"
             android:layout_alignParentBottom="true"
-            app:labelVisibilityMode="selected"
+            app:labelVisibilityMode="labeled"
+            app:itemIconSize="@dimen/_18sdp"
+            app:itemPaddingTop="@dimen/_8sdp"
             app:menu="@menu/menu_bottom_navigation_badge" />
 
     </RelativeLayout>

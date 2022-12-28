@@ -55,7 +55,7 @@ public class DatabaseRepository {
         return firestoreDBSource.searchUserFromPhoneNumber(phoneNumberHashed);
     }
 
-    public Completable sendMessage(ConversationWrapper conversationWrapper, Message message) {
+    public Single<ConversationWrapper> sendMessage(ConversationWrapper conversationWrapper, Message message) {
         return firestoreDBSource.sendMessage(conversationWrapper, message);
     }
 
@@ -78,4 +78,17 @@ public class DatabaseRepository {
     public Completable sendCallMessage(ConversationWrapper conversationWrapper, Message message) {
         return firestoreDBSource.sendCallMessage(conversationWrapper, message);
     }
+
+    public Flowable<ContactWrapInfo> listenRequest(String uid) {
+        return firestoreDBSource.listenRequest(uid);
+    }
+
+    public Completable acceptRequest(final String uid, final String contactId) {
+        return firestoreDBSource.acceptRequest(uid, contactId);
+    }
+
+    public Completable denyRequest(final String uid, final String contactId) {
+        return firestoreDBSource.denyRequest(uid, contactId);
+    }
+
 }

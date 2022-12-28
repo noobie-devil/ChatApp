@@ -1,5 +1,6 @@
 package com.zileanstdio.chatapp.Ui.login;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -9,8 +10,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
@@ -149,17 +154,21 @@ public class LoginActivity extends BaseActivity {
     public void subscribeObservers() {
         ((LoginViewModel) viewModel).observeLogin().observe(this, stateResource -> {
             if (stateResource != null) {
+                Debug.log(stateResource.toString());
                 switch (stateResource.status) {
                     case LOADING:
+                        Debug.log("loginObserver", "LOADING");
                         showLoadingDialog();
                         break;
                     case SUCCESS:
+                        Debug.log("loginObserver", "SUCCESS");
                         Toast.makeText(this, "Chào mừng đến với 'Zimess'", Toast.LENGTH_SHORT).show();
                         Intent startMainActivity = new Intent(this, MainActivity.class);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(startMainActivity);
                         break;
                     case ERROR:
+                        Debug.log("loginObserver", "ERROR");
                         closeLoadingDialog();
                         phoneNumberEditText.setEnabled(true);
                         passwordEditText.setEnabled(true);
