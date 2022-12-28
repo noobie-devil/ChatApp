@@ -56,6 +56,13 @@
     <string name="text_password_confirm">Nhập lại mật khẩu mới</string>
 
     <string name="online">Đang hoạt động</string>
+    <string name="button_switch">Button Switch</string>
+    <string name="button_speaker">Button Speaker</string>
+    <string name="button_mute">Button Mute</string>
+    <string name="button_video">Button Video</string>
+    <string name="button_end">Button End</string>
+    <string name="button_answer">Button Answer</string>
+    <string name="button_reject">Button Reject</string>
 
 
 </resources>

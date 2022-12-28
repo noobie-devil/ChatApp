@@ -1,15 +1,20 @@
 package com.zileanstdio.chatapp.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -29,10 +34,12 @@ import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Ui.call.outgoing.OutgoingCallActivity;
 import com.zileanstdio.chatapp.Ui.main.connections.contact.ContactViewModel;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Debug;
+import com.zileanstdio.chatapp.Utils.Stringee;
 
 import java.util.HashMap;
 import java.util.List;
@@ -179,8 +186,36 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             }
             viewModel.getNavigator().closeLoadingDialog();
             cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(conversationWrapper.get(), contactWrapInfo.getContact(), contactWrapInfo.getUser()));
-        }
+            btnCall.setOnClickListener(v -> {
+                if (contactWrapInfo.getUser().getPhoneNumber().trim().length() > 0) {
+                    if (Stringee.client.isConnected()) {
+                        Intent intent = new Intent(context, OutgoingCallActivity.class);
+                        Bundle bundle = new Bundle();
+                        intent.putExtra("from", Stringee.client.getUserId());
+                        intent.putExtra("to", "." + contactWrapInfo.getUser().getPhoneNumber());
+                        intent.putExtra("video", false);
+                        bundle.putSerializable("contact", contactWrapInfo);
+                        intent.putExtras(bundle);
+                        context.startActivity(intent);
+                    }
+                }
+            });
 
+            btnVideoCall.setOnClickListener(v -> {
+                if (contactWrapInfo.getUser().getPhoneNumber().trim().length() > 0) {
+                    if (Stringee.client.isConnected()) {
+                        Intent intent = new Intent(context, OutgoingCallActivity.class);
+                        Bundle bundle = new Bundle();
+                        intent.putExtra("from", Stringee.client.getUserId());
+                        intent.putExtra("to", "." + contactWrapInfo.getUser().getPhoneNumber());
+                        intent.putExtra("video", true);
+                        bundle.putSerializable("contact", contactWrapInfo);
+                        intent.putExtras(bundle);
+                        context.startActivity(intent);
+                    }
+                }
+            });
+        }
         public ConversationWrapper getConversation(ContactWrapInfo contactWrapInfo) {
             ConversationWrapper wrapper = null;
             if(viewModel.getConversationsList().size() > 0) {

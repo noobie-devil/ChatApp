@@ -35,7 +35,6 @@
             app:shapeAppearanceOverlay="@style/Circular"
             android:scaleType="centerCrop"
             />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logout"
             android:layout_width="wrap_content"
@@ -170,7 +169,6 @@
 <!--                />-->
         </LinearLayout>
     </ScrollView>
-
 
 
     <!--<RelativeLayout

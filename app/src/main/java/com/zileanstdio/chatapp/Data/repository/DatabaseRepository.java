@@ -75,6 +75,10 @@ public class DatabaseRepository {
         return firestoreDBSource.getContactWrapInfo(uid);
     }
 
+    public Completable sendCallMessage(ConversationWrapper conversationWrapper, Message message) {
+        return firestoreDBSource.sendCallMessage(conversationWrapper, message);
+    }
+
     public Flowable<ContactWrapInfo> listenRequest(String uid) {
         return firestoreDBSource.listenRequest(uid);
     }

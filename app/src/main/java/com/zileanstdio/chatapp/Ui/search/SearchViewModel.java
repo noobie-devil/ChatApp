@@ -32,6 +32,10 @@ public class SearchViewModel extends ViewModel {
         this.databaseRepository = databaseRepository;
     }
 
+    public CompositeDisposable getDisposable() {
+        return disposable;
+    }
+
     public void search(String keyword) {
         if (Pattern.matches("^[0-9]{9}[0-9]+$", keyword)) {
             databaseRepository.searchUserFromPhoneNumber(CipherUtils.Hash.sha256(keyword))

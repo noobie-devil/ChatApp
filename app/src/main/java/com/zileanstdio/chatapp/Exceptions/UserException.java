@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 
 public class UserException extends Exception {
     public enum ErrorType {
-        UNKNOWN_USER
+        UNKNOWN_USER,
+        UNKNOWN_TOKEN
     }
 
     private final ErrorType errorType;

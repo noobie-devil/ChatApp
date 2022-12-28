@@ -1,8 +1,10 @@
 package com.zileanstdio.chatapp.Ui.message;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -24,8 +26,10 @@ import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.Data.model.Message;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Ui.call.outgoing.OutgoingCallActivity;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Debug;
+import com.zileanstdio.chatapp.Utils.Stringee;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +55,10 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
     private ShapeableImageView viewStatus;
     private MaterialTextView txvContactName;
     private MaterialTextView txvOnlineStatus;
+
+    private MaterialButton btnCallVoice, btnCallVideo;
+    private final CompositeDisposable disposable = new CompositeDisposable();
+
 
     @Override
     public MessageViewModel getViewModel() {
@@ -96,6 +104,8 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
         viewStatus = findViewById(R.id.view_status);
         txvContactName = findViewById(R.id.txv_contact_name);
         txvOnlineStatus = findViewById(R.id.txv_online_status);
+        btnCallVoice = findViewById(R.id.btn_call_voice);
+        btnCallVideo = findViewById(R.id.btn_call_video);
         messageAdapter = new MessageAdapter(this, viewModel);
         rcvMessage.setAdapter(messageAdapter);
 
@@ -225,6 +235,58 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
 //                    }
 //                })
 //        );
+
+        disposable.add(RxView.clicks(btnCallVoice).subscribe(unit -> {
+            if (currentConversationWrapper != null) {
+                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.CALL.label);
+                currentConversationWrapper.getConversation().setLastSender(currentUid);
+            } else {
+                Conversation conversation = Conversation.CALL;
+                conversation.setCreatedAt(new Date());
+                conversation.setLastSender(currentUid);
+                conversation.setUserJoined(new ArrayList<String>(){{
+                    add(currentUid);
+                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+                }});
+                currentConversationWrapper = new ConversationWrapper(null, conversation);
+            }
+
+            Intent intent = new Intent(this, OutgoingCallActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("conversation", currentConversationWrapper);
+            intent.putExtra("from", Stringee.client.getUserId());
+            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+            intent.putExtra("video", false);
+            intent.putExtra("id", currentUid);
+            intent.putExtras(bundle);
+            startActivity(intent);
+        }));
+
+        disposable.add(RxView.clicks(btnCallVideo).subscribe(unit -> {
+            if (currentConversationWrapper != null) {
+                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.VIDEO_CALL.label);
+                currentConversationWrapper.getConversation().setLastSender(currentUid);
+            } else {
+                Conversation conversation = Conversation.VIDEO_CALL;
+                conversation.setCreatedAt(new Date());
+                conversation.setLastSender(currentUid);
+                conversation.setUserJoined(new ArrayList<String>(){{
+                    add(currentUid);
+                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+                }});
+                currentConversationWrapper = new ConversationWrapper(null, conversation);
+            }
+
+            Intent intent = new Intent(this, OutgoingCallActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("conversation", currentConversationWrapper);
+            intent.putExtra("from", Stringee.client.getUserId());
+            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+            intent.putExtra("video", true);
+            intent.putExtra("id", currentUid);
+            intent.putExtras(bundle);
+            startActivity(intent);
+        }));
 
 
 //        if(viewModel.getConversationLiveData().getValue() != null) {
