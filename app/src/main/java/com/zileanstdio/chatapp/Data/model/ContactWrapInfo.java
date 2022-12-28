@@ -1,8 +1,9 @@
 package com.zileanstdio.chatapp.Data.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ContactWrapInfo {
+public class ContactWrapInfo implements Serializable {
     private Contact contact;
     private User user;
 

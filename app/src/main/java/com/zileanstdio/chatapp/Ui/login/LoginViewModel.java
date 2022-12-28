@@ -30,6 +30,10 @@ public class LoginViewModel extends ViewModel {
         this.authRepository = authRepository;
     }
 
+    public CompositeDisposable getDisposable() {
+        return disposable;
+    }
+
     public void login(String phoneNumber, String password) {
         authRepository.login(phoneNumber, password).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

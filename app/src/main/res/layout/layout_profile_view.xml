@@ -28,21 +28,21 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_user_name"
-        android:backgroundTint="?attr/colorOnTertiary"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_42sdp"
-        android:layout_marginBottom="@dimen/_4sdp"
         android:layout_below="@id/cv_avatar"
-        android:layout_marginHorizontal="@dimen/_2sdp"
         android:layout_centerInParent="true"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:backgroundTint="?attr/colorOnTertiary"
         android:gravity="start|center_vertical"
         android:text="Người dùng: Zimess"
-        android:textSize="@dimen/_15ssp"
         android:textColor="?attr/colorOutline"
+        android:textSize="@dimen/_15ssp"
+        app:cornerRadius="0dp"
         app:icon="@drawable/ic_solid_pen"
-        app:iconTint="?attr/colorOutline"
         app:iconGravity="end"
-        app:cornerRadius="0dp" />
+        app:iconTint="?attr/colorOutline" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_password"

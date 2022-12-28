@@ -5,6 +5,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -26,8 +28,10 @@ import com.zileanstdio.chatapp.Exceptions.VerificationException;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Constants;
 import com.zileanstdio.chatapp.Utils.Debug;
+import com.zileanstdio.chatapp.Utils.Stringee;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -210,6 +214,31 @@ public class FirebaseAuthSource {
                             .addOnSuccessListener(command1 -> emitter.onComplete())
                             .addOnFailureListener(e -> emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER, "Không thể cập nhật mật khẩu mới")))
                     ).addOnFailureListener(e -> emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER, "Mật khẩu không đúng")));
+        });
+    }
+
+    public Completable createAccessToken(String phoneNumber) {
+        return Completable.create(emitter -> {
+            try {
+                Algorithm signature = Algorithm.HMAC256("YWU2OWNnSGVlQm9Sd3NoRUttSmJ6NVYwU0tjaTA0OWY=");
+                HashMap<String, Object> header = new HashMap<String, Object>() {{
+                    put("cty", "stringee-api;v=1");
+                    put("typ", "JWT");
+                    put("alg", "HS256");
+                }};
+
+                String keySID = "SK.0.smkjxTV6ntui2aX64mYBDPJ81lLJzypr";
+                Stringee.token = JWT.create().withHeader(header)
+                        .withClaim("jti", keySID + "-" + System.currentTimeMillis())
+                        .withClaim("iss", keySID)
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000))
+                        .withClaim("userId", "." + phoneNumber).sign(signature);
+
+                emitter.onComplete();
+            } catch (Exception e) {
+                emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_TOKEN,
+                        "Không thể kết nối đến máy chủ cuộc gọi"));
+            }
         });
     }
 }

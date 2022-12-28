@@ -1,5 +1,8 @@
 package com.zileanstdio.chatapp.Utils;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,5 +27,10 @@ public class Common {
         String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(temp).replaceAll("").toUpperCase(Locale.ROOT);
+    }
+
+    public static void postDelay(Runnable runnable, long delayMillis) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(runnable, delayMillis);
     }
 }

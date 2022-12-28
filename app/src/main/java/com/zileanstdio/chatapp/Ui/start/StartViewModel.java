@@ -29,6 +29,10 @@ public class StartViewModel extends ViewModel {
         checkLoginUser();
     }
 
+    public CompositeDisposable getDisposable() {
+        return disposable;
+    }
+
     public void checkLoginUser() {
         authRepository.checkLoginUser().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

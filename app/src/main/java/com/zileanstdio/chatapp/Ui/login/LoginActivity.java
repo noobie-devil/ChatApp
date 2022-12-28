@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -49,14 +48,14 @@ public class LoginActivity extends BaseActivity {
             Observable<Boolean> phoneNumberInputObservable = RxTextView.textChanges(phoneNumberEditText)
                     .map(inputText -> validatePhoneNumber(inputText.toString()))
                     .distinctUntilChanged();
-            disposable.add(phoneNumberInputObservable.subscribe(isValid -> loginButton.setEnabled(isValid)));
+            ((LoginViewModel) viewModel).getDisposable().add(phoneNumberInputObservable.subscribe(isValid -> loginButton.setEnabled(isValid)));
         }
 
         if (passwordEditText != null) {
             Observable<Boolean> passwordInputObservable = RxTextView.textChanges(passwordEditText)
                     .map(inputText -> validatePassword(inputText.toString()))
                     .distinctUntilChanged();
-            disposable.add(passwordInputObservable.subscribe(isValid -> loginButton.setEnabled(isValid)));
+            ((LoginViewModel) viewModel).getDisposable().add(passwordInputObservable.subscribe(isValid -> loginButton.setEnabled(isValid)));
         }
 
         loginButton.setOnClickListener(v -> {

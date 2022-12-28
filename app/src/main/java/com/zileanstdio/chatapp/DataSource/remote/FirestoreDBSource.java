@@ -165,10 +165,14 @@ public class FirestoreDBSource {
                             emitter.onError(error);
                         }
                         if (value != null) {
-                            for (DocumentChange documentChange : value.getDocumentChanges()) {
-                                if (documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
-                                    User user = documentChange.getDocument().toObject(User.class);
-                                    emitter.onNext(user);
+                            if (value.getDocumentChanges().size() == 0) {
+                                emitter.onNext(new User());
+                            } else {
+                                for (DocumentChange documentChange : value.getDocumentChanges()) {
+                                    if (documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                        User user = documentChange.getDocument().toObject(User.class);
+                                        emitter.onNext(user);
+                                    }
                                 }
                             }
                         }
@@ -186,10 +190,14 @@ public class FirestoreDBSource {
                             emitter.onError(error);
                         }
                         if (value != null) {
-                            for(DocumentChange documentChange : value.getDocumentChanges()) {
-                                if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
-                                    User user = documentChange.getDocument().toObject(User.class);
-                                    emitter.onNext(user);
+                            if (value.getDocumentChanges().size() == 0) {
+                                emitter.onNext(new User());
+                            } else {
+                                for(DocumentChange documentChange : value.getDocumentChanges()) {
+                                    if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                        User user = documentChange.getDocument().toObject(User.class);
+                                        emitter.onNext(user);
+                                    }
                                 }
                             }
                         }
@@ -197,8 +205,6 @@ public class FirestoreDBSource {
             emitter.setCancellable(registration::remove);
         }, BackpressureStrategy.BUFFER);
     }
-
-}
 
     public Single<Contact> checkExistContact(final String uid, final String contactUid) {
         return Single.create(emitter -> {
@@ -357,5 +363,21 @@ public class FirestoreDBSource {
 
         });
     }
-}
 
+    public Completable sendCallMessage(final ConversationWrapper conversation, final Message message) {
+        return Completable.create(emitter -> {
+            WriteBatch requestBatch = firebaseFirestore.batch();
+            message.setSendAt(new Date());
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            DocumentReference conversationReference = firebaseFirestore.collection(Constants.KEY_COLLECTION_CONVERSATION)
+                    .document(conversation.getDocumentId() != null ? conversation.getDocumentId() : String.valueOf(timestamp.getTime()));
+            DocumentReference messageReference = conversationReference.collection(Constants.KEY_COLLECTION_MESSAGE)
+                    .document(String.valueOf(timestamp.getTime()));
+            requestBatch.set(conversationReference, conversation.getConversation());
+            requestBatch.set(messageReference, message);
+            requestBatch.commit()
+                    .addOnSuccessListener(command -> emitter.onComplete())
+                    .addOnFailureListener(emitter::onError);
+        });
+    }
+}

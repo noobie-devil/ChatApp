@@ -82,7 +82,7 @@ public class ChatView extends BaseFragment<ChatViewModel> implements ChatViewMod
 
 
         viewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
-            if(user.getConversationList().size() > 0) {
+            if ((user.getConversationList() != null) && user.getConversationList().size() > 0) {
                 getRecentConversation(user.getConversationList());
             }
         });

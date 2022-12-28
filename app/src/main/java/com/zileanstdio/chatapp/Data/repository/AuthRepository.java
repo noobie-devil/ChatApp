@@ -67,4 +67,8 @@ public class AuthRepository {
     public Completable changePassword(String email, String passwordOld, String passwordNew) {
         return this.firebaseAuthSource.changePassword(email, passwordOld, passwordNew);
     }
+
+    public Completable createAccessToken(String phoneNumber) {
+        return this.firebaseAuthSource.createAccessToken(phoneNumber);
+    }
 }
