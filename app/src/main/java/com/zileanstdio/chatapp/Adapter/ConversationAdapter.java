@@ -46,6 +46,7 @@ import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Constants;
 import com.zileanstdio.chatapp.Utils.Debug;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     private final String TAG = this.getClass().getSimpleName();
     final Context context;
     final ChatViewModel viewModel;
-    final CompositeDisposable disposable = new CompositeDisposable();
+    private List<ConversationWrapper> conversationWrapperList = new ArrayList<>();
 
 
     private final AsyncListDiffer<ConversationWrapper> asyncListDiffer;
@@ -80,10 +81,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
             @Override
             public boolean areContentsTheSame(@NonNull ConversationWrapper oldItem, @NonNull ConversationWrapper newItem) {
-                return oldItem.equals(newItem);
+                return Objects.equals(oldItem.getDocumentId(), newItem.getDocumentId()) && oldItem.getConversation().equals(newItem.getConversation());
             }
         };
         asyncListDiffer = new AsyncListDiffer<>(this, diffCallback);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setConversationWrapperList(List<ConversationWrapper> conversationWrapperList) {
+        this.conversationWrapperList = conversationWrapperList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -98,7 +105,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         final int index = position;
         BehaviorSubject<User> userBehaviorSubject = BehaviorSubject.createDefault(new User());
         BehaviorSubject<Contact> contactBehaviorSubject = BehaviorSubject.createDefault(new Contact());
-        ConversationWrapper conversationWrapper = getItem(position);
+//        ConversationWrapper conversationWrapper = getItem(position);
+        ConversationWrapper conversationWrapper = conversationWrapperList.get(position);
         viewModel.getCurrentUser().observe((LifecycleOwner) holder.itemView.getContext(), user -> {
             for(String uid : conversationWrapper.getConversation().getUserJoined()) {
                 if(!uid.equals(CipherUtils.Hash.sha256(user.getPhoneNumber()))) {
@@ -109,7 +117,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             }
         });
 
-        disposable.add(
+        viewModel.getDisposable().add(
             BehaviorSubject.combineLatest(userBehaviorSubject, contactBehaviorSubject, (user, contact) -> user != null || contact != null)
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .subscribe(aBoolean -> {
@@ -133,7 +141,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     @Override
     public int getItemCount() {
-        return asyncListDiffer.getCurrentList().size();
+        return conversationWrapperList.size();
     }
 
 
@@ -199,7 +207,28 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
             rootView.setOnClickListener(v -> {
                 viewModel.getNavigator().navigateToMessage(conversationWrapper, contact, contactProfile);
-//                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
+//                View viewInflated = LayoutInflater.from(context).inflate(R.layout.layout_m3_ac_txv_component, null, false);
+//                TestAdapter adapter = new TestAdapter(new ArrayList<String>(){{
+//                    add("test");
+//                    add("test");
+//                    add("test");
+//                    add("test");
+//                    add("test");
+//                    add("test");
+//                    add("test");
+//                }});
+//                CustomAutoCompleteTextView<TestAdapter.ViewHolder> autoCompleteTextView = viewInflated.findViewById(R.id.ac_txv_component);
+//                autoCompleteTextView.setAdapter(new AutoCompleteTextViewAdapter<TestAdapter.ViewHolder>(adapter));
+//                new MaterialAlertDialogBuilder(context)
+//                        .setView(viewInflated)
+//                        .setPositiveButton("Ok", (dialog, which) -> {
+//
+//                        })
+//                        .setNegativeButton("Cancel", (dialog, which) -> {
+//                            dialog.dismiss();
+//                        })
+//                        .show();
             });
         }
 
@@ -211,9 +240,4 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         }
     }
 
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView);
-        disposable.clear();
-    }
 }

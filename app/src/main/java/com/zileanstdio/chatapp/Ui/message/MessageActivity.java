@@ -29,9 +29,8 @@ import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class MessageActivity extends BaseActivity<MessageViewModel> {
     public static final String ARG_CURRENT_UID = "current_uid";
@@ -52,7 +51,6 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
     private ShapeableImageView viewStatus;
     private MaterialTextView txvContactName;
     private MaterialTextView txvOnlineStatus;
-    private final CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     public MessageViewModel getViewModel() {
@@ -130,46 +128,103 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
 //                        });
 
             }
-            if(currentConversationWrapper != null) {
+            if(currentConversationWrapper != null && currentConversationWrapper.getDocumentId() != null) {
                 Debug.log("currentConversationWrapper", currentConversationWrapper.toString());
                 viewModel.getMessageList(currentConversationWrapper.getDocumentId());
             }
         }
 
+        viewModel.getConversationLiveData().observe(this, conversationWrapper -> {
+            Debug.log("getConversationLiveData", conversationWrapper.getDocumentId());
+//            Debug.log("getConversationLiveData:currentConversationWrapper", currentConversationWrapper.getDocumentId());
+            if(conversationWrapper != null) {
+                if(currentConversationWrapper == null || !Objects.equals(conversationWrapper.getDocumentId(), currentConversationWrapper.getDocumentId())) {
+                    Debug.log("getConversationLiveData", "true condition");
+                    currentConversationWrapper = conversationWrapper;
+                    viewModel.getMessageList(currentConversationWrapper.getDocumentId());
+                } else {
+                    Debug.log("getConversationLiveData", "else condition");
+                    currentConversationWrapper = conversationWrapper;
+                }
+            }
 
-        disposable.add(RxView.clicks(btnSendMessage)
-                .debounce(200, TimeUnit.MILLISECONDS)
-                .subscribe(unit -> {
-                    if(edtMessage.getText() != null && edtMessage.getText().toString().trim().length() > 0) {
-                        if(currentConversationWrapper != null) {
-                            currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.TEXT.label);
-                            currentConversationWrapper.getConversation().setLastSender(currentUid);
-                            currentConversationWrapper.getConversation().setLastMessage(edtMessage.getText().toString().trim());
-                            currentConversationWrapper.getConversation().setLastUpdated(new Date());
-                        } else {
-                            Conversation conversation = Conversation.TEXT;
-                            conversation.setLastSender(currentUid);
-                            conversation.setLastUpdated(new Date());
-                            conversation.setCreatedAt(new Date());
-                            conversation.setUserJoined(new ArrayList<String>(){{
-                                add(currentUid);
-                                add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
-                            }});
-                            conversation.setLastMessage(edtMessage.getText().toString().trim());
-                            currentConversationWrapper = new ConversationWrapper(null, conversation);
-                        }
-                        Message message = new Message(currentUid,
-                                        Conversation.Type.TEXT.label,
-                                        edtMessage.getText().toString().trim(),
-                                        new Date());
-                        viewModel.sendMessage(currentConversationWrapper, message);
-                        edtMessage.getText().clear();
-                    }
-                    else{
+        });
 
-                    }
-                })
-        );
+        btnSendMessage.setOnClickListener(v -> {
+            if(edtMessage.getText() != null && edtMessage.getText().toString().trim().length() > 0) {
+                Message message = new Message(currentUid,
+                        Conversation.Type.TEXT.label,
+                        edtMessage.getText().toString().trim(),
+                        new Date());
+                if(currentConversationWrapper != null) {
+                    Debug.log("listenSendEvent", "currentConversationWrapper != null");
+                    currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.TEXT.label);
+                    currentConversationWrapper.getConversation().setLastSender(currentUid);
+                    currentConversationWrapper.getConversation().setLastMessage(edtMessage.getText().toString().trim());
+                    edtMessage.getText().clear();
+                    currentConversationWrapper.getConversation().setLastUpdated(new Date());
+                    viewModel.sendMessage(currentConversationWrapper, message);
+                } else {
+                    Debug.log("listenSendEvent", "currentConversationWrapper = null");
+                    Conversation conversation = Conversation.TEXT;
+                    conversation.setLastMessage(edtMessage.getText().toString().trim());
+                    edtMessage.getText().clear();
+                    conversation.setLastSender(currentUid);
+                    conversation.setLastUpdated(new Date());
+                    conversation.setCreatedAt(new Date());
+                    conversation.setUserJoined(new ArrayList<String>(){{
+                        add(currentUid);
+                        add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+                    }});
+
+                    final ConversationWrapper conversationWrapper = new ConversationWrapper(null, conversation);
+                    viewModel.sendMessage(conversationWrapper, message);
+                }
+
+            }
+            else{
+
+            }
+        });
+//        viewModel.getDisposable().add(RxView.clicks(btnSendMessage)
+//                .debounce(200, TimeUnit.MILLISECONDS)
+//                .subscribe(unit -> {
+//                    if(edtMessage.getText() != null && edtMessage.getText().toString().trim().length() > 0) {
+//                        Message message = new Message(currentUid,
+//                                Conversation.Type.TEXT.label,
+//                                edtMessage.getText().toString().trim(),
+//                                new Date());
+//                        if(currentConversationWrapper != null) {
+//                            Debug.log("listenSendEvent", "currentConversationWrapper != null");
+//                            currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.TEXT.label);
+//                            currentConversationWrapper.getConversation().setLastSender(currentUid);
+//                            currentConversationWrapper.getConversation().setLastMessage(edtMessage.getText().toString().trim());
+//                            edtMessage.getText().clear();
+//                            currentConversationWrapper.getConversation().setLastUpdated(new Date());
+//                            viewModel.sendMessage(currentConversationWrapper, message);
+//                        } else {
+//                            Debug.log("listenSendEvent", "currentConversationWrapper = null");
+//                            Conversation conversation = Conversation.TEXT;
+//                            conversation.setLastMessage(edtMessage.getText().toString().trim());
+//                            edtMessage.getText().clear();
+//                            conversation.setLastSender(currentUid);
+//                            conversation.setLastUpdated(new Date());
+//                            conversation.setCreatedAt(new Date());
+//                            conversation.setUserJoined(new ArrayList<String>(){{
+//                                add(currentUid);
+//                                add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+//                            }});
+//
+//                            final ConversationWrapper conversationWrapper = new ConversationWrapper(null, conversation);
+//                            viewModel.sendMessage(conversationWrapper, message);
+//                        }
+//
+//                    }
+//                    else{
+//
+//                    }
+//                })
+//        );
 
 
 //        if(viewModel.getConversationLiveData().getValue() != null) {
@@ -225,9 +280,4 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposable.clear();
-    }
 }

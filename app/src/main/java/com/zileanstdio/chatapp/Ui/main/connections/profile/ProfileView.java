@@ -8,7 +8,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -16,11 +15,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 import com.squareup.picasso.Picasso;
@@ -35,7 +36,7 @@ public class ProfileView extends BaseFragment {
 
     private String userName, numberPhone;
 
-    private ImageView imvAvatar;
+    private ShapeableImageView imvAvatar;
     private MaterialButton btnUsername, btnPassword, btnLogout;
     private MaterialTextView txvName, txvPhone, txvBirthdate, txvGender;
 
@@ -80,7 +81,12 @@ public class ProfileView extends BaseFragment {
 
         ((MainActivity) baseActivity).getViewModel().getUserInfo().observe(getViewLifecycleOwner(), user -> {
             if ((user.getAvatarImageUrl() != null) && !user.getAvatarImageUrl().isEmpty()) {
-                Picasso.get().load(user.getAvatarImageUrl()).into(imvAvatar);
+                Glide.with(baseActivity)
+                    .load(user.getAvatarImageUrl())
+                    .error(R.drawable.ic_default_user)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(imvAvatar);
+//                Picasso.get().load(user.getAvatarImageUrl()).into(imvAvatar);
             } else {
                 imvAvatar.setImageResource(R.drawable.ic_default_user);
             }

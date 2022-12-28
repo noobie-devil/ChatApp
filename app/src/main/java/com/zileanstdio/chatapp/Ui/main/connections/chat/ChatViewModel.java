@@ -35,6 +35,7 @@ public class ChatViewModel extends ViewModel {
     private final DatabaseRepository databaseRepository;
     private final CompositeDisposable disposable;
     private final MediatorLiveData<List<ConversationWrapper>> conversationsLiveData;
+    private final List<ConversationWrapper> conversationWrapperList = new ArrayList<>();
     private final HashMap<String, ConversationWrapper> conversationList = new HashMap<>();
     final MutableLiveData<User> currentUser = new MutableLiveData<>();
     private Navigator navigator;
@@ -97,6 +98,52 @@ public class ChatViewModel extends ViewModel {
 //    }
 
 
+    public void listenRecentConversation(List<String> conversationsId) {
+        databaseRepository.getRecentConversations(conversationsId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .toObservable()
+                .subscribe(new Observer<QuerySnapshot>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        disposable.add(d);
+                    }
+
+                    @Override
+                    public void onNext(@NonNull QuerySnapshot queryDocumentSnapshots) {
+                        Debug.log("loadRecentConversations:onNext");
+                        if(queryDocumentSnapshots != null) {
+                            for(DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
+                                if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                    Conversation conversation = documentChange.getDocument().toObject(Conversation.class);
+                                    String conversationId = documentChange.getDocument().getId();
+                                    Debug.log("loadRecentConversation:onNext", conversation.toString());
+                                    conversationList.put(conversationId, new ConversationWrapper(conversationId, conversation));
+                                }
+                            }
+                            conversationWrapperList.clear();
+                            conversationWrapperList.addAll(0, new ArrayList<>(conversationList.values()));
+                            conversationWrapperList.sort((obj1, obj2) -> obj2.getConversation().getLastUpdated()
+                                    .compareTo(obj1.getConversation().getLastUpdated()));
+                            conversationsLiveData.postValue(conversationWrapperList);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Debug.log("listenRecentConversations:onError", e.getMessage());
+                        if(conversationWrapperList.size() == 0) {
+                            conversationsLiveData.postValue(new ArrayList<>());
+                        }
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Debug.log("listenRecentConversations", "onComplete");
+                    }
+                });
+    }
+
     public LiveData<List<ConversationWrapper>> loadRecentConversations(List<String> conversationsId) {
         MutableLiveData<List<ConversationWrapper>> listMutableLiveData = new MutableLiveData<>();
         databaseRepository.getRecentConversations(conversationsId)
@@ -111,6 +158,7 @@ public class ChatViewModel extends ViewModel {
 
                     @Override
                     public void onNext(@NonNull QuerySnapshot queryDocumentSnapshots) {
+                        Debug.log("loadRecentConversations:onNext");
                         if(queryDocumentSnapshots != null) {
                             for(DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
                                 if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
@@ -119,19 +167,25 @@ public class ChatViewModel extends ViewModel {
                                     conversationList.put(conversationId, new ConversationWrapper(conversationId, conversation));
                                 }
                             }
+                            conversationWrapperList.clear();
+                            conversationWrapperList.addAll(0, new ArrayList<>(conversationList.values()));
+                            conversationWrapperList.sort((obj1, obj2) -> obj2.getConversation().getLastUpdated()
+                                    .compareTo(obj1.getConversation().getLastUpdated()));
+                            listMutableLiveData.postValue(conversationWrapperList);
                         }
-                        new ArrayList<>(conversationList.values())
-                                .sort((obj1, obj2) -> obj2.getConversation().getLastUpdated()
-                                        .compareTo(obj1.getConversation().getLastUpdated()));
-                        conversationsLiveData.setValue(new ArrayList<>(conversationList.values()));
-                        listMutableLiveData.setValue(new ArrayList<>(conversationList.values()));
+//                        new ArrayList<>(conversationList.values())
+//                                .sort((obj1, obj2) -> obj2.getConversation().getLastUpdated()
+//                                        .compareTo(obj1.getConversation().getLastUpdated()));
+//                        conversationsLiveData.setValue(new ArrayList<>(conversationList.values()));
+//                        listMutableLiveData.setValue(new ArrayList<>(conversationList.values()));
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         Debug.log("loadRecentConversations:onError", e.getMessage());
-                        listMutableLiveData.setValue(new ArrayList<>());
-                        conversationsLiveData.setValue(new ArrayList<>());
+                        if(conversationWrapperList.size() == 0) {
+                            listMutableLiveData.postValue(new ArrayList<>());
+                        }
                     }
 
                     @Override
@@ -236,6 +290,10 @@ public class ChatViewModel extends ViewModel {
         return conversationsLiveData;
     }
 
+    public CompositeDisposable getDisposable() {
+        return disposable;
+    }
+
     public MutableLiveData<User> getCurrentUser() {
         return currentUser;
     }
@@ -243,4 +301,5 @@ public class ChatViewModel extends ViewModel {
     public interface Navigator {
         public void navigateToMessage(ConversationWrapper conversationWrapper, Contact contact, User contactProfile);
     }
+
 }

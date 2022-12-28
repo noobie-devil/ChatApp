@@ -42,6 +42,7 @@ public class MessageViewModel extends ViewModel {
     private final MutableLiveData<User> contactProfileLiveData;
     private final MutableLiveData<User> currentUser;
     private final List<MessageWrapper> messageWrapperList;
+    private final HashMap<String, MessageWrapper> messageWrapperHashMap = new HashMap<>();
     private final MutableLiveData<HashMap<String, String>> listImageUrlContact;
     private final MediatorLiveData<List<MessageWrapper>> messagesLiveData;
     private final MutableLiveData<String> uidLiveData;
@@ -59,6 +60,10 @@ public class MessageViewModel extends ViewModel {
         this.contactProfileLiveData = new MutableLiveData<>();
         this.currentUser = new MutableLiveData<>();
         this.uidLiveData = new MutableLiveData<>();
+    }
+
+    public CompositeDisposable getDisposable() {
+        return disposable;
     }
 
     public MutableLiveData<HashMap<String, String>> getListImageUrlContact() {
@@ -179,15 +184,16 @@ public class MessageViewModel extends ViewModel {
         databaseRepository.sendMessage(conversationWrapper, message)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletableObserver() {
+                .subscribe(new SingleObserver<ConversationWrapper>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         disposable.add(d);
                     }
 
                     @Override
-                    public void onComplete() {
-                        Debug.log(TAG + ":sendMessage:onComplete", "Send message successfully");
+                    public void onSuccess(@NonNull ConversationWrapper conversationWrapper) {
+                        conversationLiveData.postValue(conversationWrapper);
+                        Debug.log(TAG + ":sendMessage:onSuccess", "Send message successfully");
                     }
 
                     @Override
@@ -195,6 +201,22 @@ public class MessageViewModel extends ViewModel {
                         Debug.log(TAG + ":sendMessage:onError", e.getMessage());
                     }
                 });
+//                .subscribe(new CompletableObserver() {
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//                        disposable.add(d);
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//                        Debug.log(TAG + ":sendMessage:onComplete", "Send message successfully");
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        Debug.log(TAG + ":sendMessage:onError", e.getMessage());
+//                    }
+//                });
     }
 
     public void getMessageList(String documentId) {
@@ -212,12 +234,15 @@ public class MessageViewModel extends ViewModel {
                     public void onNext(@NonNull QuerySnapshot queryDocumentSnapshots) {
                         if(queryDocumentSnapshots != null) {
                             for(DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
-                                if(documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
+                                if(documentChange.getType() == DocumentChange.Type.ADDED) {
                                     Message message = documentChange.getDocument().toObject(Message.class);
                                     String messageId = documentChange.getDocument().getId();
-                                    messageWrapperList.add(new MessageWrapper(messageId, message));
+                                    messageWrapperHashMap.put(messageId, new MessageWrapper(messageId, message));
+//                                    messageWrapperList.add(new MessageWrapper(messageId, message));
                                 }
                             }
+                            messageWrapperList.clear();
+                            messageWrapperList.addAll(0, new ArrayList<>(messageWrapperHashMap.values()));
                             messageWrapperList.sort(Comparator.comparing(o -> o.getMessage().getSendAt()));
                             messagesLiveData.postValue(messageWrapperList);
                         }
@@ -238,8 +263,6 @@ public class MessageViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        if(disposable != null) {
-            disposable.dispose();
-        }
+        disposable.clear();
     }
 }

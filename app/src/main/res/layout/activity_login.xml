@@ -12,13 +12,11 @@
         android:id="@+id/activity_login.next_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:clickable="true"
         android:layout_gravity="bottom|end"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         app:srcCompat="@drawable/ic_arrow_right_regular"
         app:tint="@color/white"
-        android:enabled="false"
         />
 
     <LinearLayout

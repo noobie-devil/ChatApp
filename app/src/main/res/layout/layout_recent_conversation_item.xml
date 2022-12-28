@@ -29,6 +29,7 @@
             app:layout_constraintRight_toLeftOf="@id/view_content"
             app:shapeAppearanceOverlay="@style/Circular"
             android:scaleType="centerCrop"
+            android:src="@drawable/ic_default_user"
             />
         <LinearLayout
             android:gravity="center"

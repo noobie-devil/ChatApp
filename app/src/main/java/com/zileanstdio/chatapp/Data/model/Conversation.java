@@ -7,6 +7,7 @@ import com.zileanstdio.chatapp.Utils.Constants;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 // TODO: 12/11/2022  
 public class Conversation implements Serializable {
@@ -119,5 +120,18 @@ public class Conversation implements Serializable {
                 ", lastSender='" + lastSender + '\'' +
                 ", lastUpdated=" + lastUpdated +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Conversation that = (Conversation) o;
+        return Objects.equals(userJoined, that.userJoined) && Objects.equals(createdAt, that.createdAt) && Objects.equals(lastMessage, that.lastMessage) && Objects.equals(typeMessage, that.typeMessage) && Objects.equals(lastSender, that.lastSender) && Objects.equals(lastUpdated, that.lastUpdated);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userJoined, createdAt, lastMessage, typeMessage, lastSender, lastUpdated);
     }
 }

@@ -6,6 +6,9 @@ public class ContactWrapInfo {
     private Contact contact;
     private User user;
 
+    public ContactWrapInfo() {
+    }
+
     public ContactWrapInfo(Contact contact, User user) {
         this.contact = contact;
         this.user = user;

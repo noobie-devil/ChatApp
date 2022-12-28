@@ -2,6 +2,8 @@ package com.zileanstdio.chatapp.Adapter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +27,10 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
+import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.main.connections.contact.ContactViewModel;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Common;
 import com.zileanstdio.chatapp.Utils.Debug;
 
@@ -34,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
@@ -164,8 +169,32 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                         })
                         .into(imvAvatar);
             }
+            AtomicReference<ConversationWrapper> conversationWrapper = new AtomicReference<>();
+            conversationWrapper.set(getConversation(contactWrapInfo));
+            viewModel.getNavigator().showLoadingDialog();
+            if(conversationWrapper.get() == null) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    conversationWrapper.set(getConversation(contactWrapInfo));
+                }, 5000);
+            }
+            viewModel.getNavigator().closeLoadingDialog();
+            cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(conversationWrapper.get(), contactWrapInfo.getContact(), contactWrapInfo.getUser()));
+        }
 
-            cvContactItem.setOnClickListener(v -> viewModel.getNavigator().navigateToMessage(null, contactWrapInfo.getContact(), contactWrapInfo.getUser()));
+        public ConversationWrapper getConversation(ContactWrapInfo contactWrapInfo) {
+            ConversationWrapper wrapper = null;
+            if(viewModel.getConversationsList().size() > 0) {
+                for(ConversationWrapper conversationWrapper : viewModel.getConversationsList()) {
+                    String uid = CipherUtils.Hash.sha256(contactWrapInfo.getContact().getNumberPhone());
+                    if(conversationWrapper.getConversation().getUserJoined().contains(uid)) {
+                        wrapper = conversationWrapper;
+                        break;
+                    }
+                }
+                return wrapper;
+            } else {
+                return wrapper;
+            }
         }
     }
 }

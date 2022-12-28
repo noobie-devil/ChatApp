@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
+import com.zileanstdio.chatapp.Utils.Debug;
 import com.zileanstdio.chatapp.Utils.StateResource;
 
 import javax.inject.Inject;
@@ -47,6 +48,7 @@ public class LoginViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
+                        Debug.log("LoginViewModel:login:onError", e.getMessage());
                         String message = "";
                         if (e.getMessage() != null) {
                             message = e.getMessage();
