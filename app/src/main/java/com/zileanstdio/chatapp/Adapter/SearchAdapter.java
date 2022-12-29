@@ -22,6 +22,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 import com.squareup.picasso.Picasso;
 import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Ui.search.SearchViewModel;
@@ -56,8 +57,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     @Override
     public void onBindViewHolder(@NonNull SearchAdapter.SearchViewHolder holder, int position) {
         User user = users.get(position);
+        Contact contact = null;
         if(viewModel.getContactHashMap().size() > 0 && viewModel.getContactHashMap().containsKey(user.getPhoneNumber())) {
-            Contact contact = viewModel.getContactHashMap().get(user.getPhoneNumber());
+            contact = viewModel.getContactHashMap().get(user.getPhoneNumber());
             switch (contact.getRelationship()) {
                 case 1:
                     holder.txvIsFriend.setText("Đã là bạn");
@@ -96,6 +98,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 //                holder.btnAddFriend.setText("Kết bạn");
 //                holder.btnAddFriend.setEnabled(true);
 //            }
+        } else {
+            holder.txvIsFriend.setText("");
+            holder.txvIsFriend.setVisibility(View.GONE);
+            holder.btnAddFriend.setEnabled(true);
+            holder.btnAddFriend.setText("Kết bạn");
+            holder.btnAddFriend.setVisibility(View.VISIBLE);
         }
         if ((user.getAvatarImageUrl() != null) && !user.getAvatarImageUrl().isEmpty()) {
             Glide.with(context)
@@ -111,6 +119,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         } else {
             holder.txvName.setText("Người dùng Zimess");
         }
+        Contact finalContact = contact;
+        holder.btnAddFriend.setOnClickListener(v -> {
+            viewModel.getNavigator().sendFriendRequest(position, new ContactWrapInfo(finalContact, user));
+        });
         holder.txvPhoneNumber.setText(user.getPhoneNumber());
     }
 

@@ -14,17 +14,21 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.google.android.material.textview.MaterialTextView;
 import com.jakewharton.rxbinding4.widget.RxSearchView;
 import com.zileanstdio.chatapp.Adapter.SearchAdapter;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
+import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +37,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @SuppressLint({"NotifyDataSetChanged", "ClickableViewAccessibility", "SetTextI18n"})
-public class SearchActivity extends BaseActivity<SearchViewModel> {
+public class SearchActivity extends BaseActivity<SearchViewModel> implements SearchViewModel.Navigator {
 
     private Integer status = 0;
     private String userName;
@@ -52,7 +56,7 @@ public class SearchActivity extends BaseActivity<SearchViewModel> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
+        viewModel.setNavigator(this);
         initAppBar();
         setView();
         clearSearch();
@@ -63,12 +67,12 @@ public class SearchActivity extends BaseActivity<SearchViewModel> {
                     .map(inputText -> specifyNumberPhone(String.valueOf(inputText)))
                     .distinctUntilChanged();
 
-            ((SearchViewModel) viewModel).getDisposable().add(searchInputObservable.filter(item -> item != 0)
+            viewModel.getDisposable().add(searchInputObservable.filter(item -> item != 0)
                     .debounce(800, TimeUnit.MILLISECONDS)
                     .subscribe(result -> {
                         users.clear();
                         new Handler(Looper.getMainLooper()).post(() -> searchAdapter.setUsers(users));
-                        ((SearchViewModel) viewModel).search(String.valueOf(searchView.getQuery()));
+                        viewModel.search(String.valueOf(searchView.getQuery()));
                     }));
 
             searchView.setOnClickListener(v -> searchView.onActionViewExpanded());
@@ -192,6 +196,25 @@ public class SearchActivity extends BaseActivity<SearchViewModel> {
                 } else {
                     searchWithoutData();
                 }
+            }
+        });
+    }
+
+    @Override
+    public void sendFriendRequest(int position, ContactWrapInfo contactWrapInfo) {
+        if(contactWrapInfo.getContact() == null) {
+            Contact contact = new Contact(contactWrapInfo.getUser().getPhoneNumber(), null, -1, new Date());
+            contactWrapInfo.setContact(contact);
+        } else {
+            contactWrapInfo.getContact().setRelationship(-1);
+        }
+        viewModel.sendFriendRequest(contactWrapInfo, phoneNumber).observe(this, aBoolean -> {
+            if(aBoolean) {
+                viewModel.getContactHashMap().put(contactWrapInfo.getUser().getPhoneNumber(), contactWrapInfo.getContact());
+                searchAdapter.notifyItemChanged(position);
+                Toast.makeText(this, "Gửi kết bạn thành công", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Đã xảy ra lỗi, thử lại sau", Toast.LENGTH_SHORT).show();
             }
         });
     }

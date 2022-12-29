@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Data.repository.DatabaseRepository;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -37,10 +39,20 @@ public class SearchViewModel extends ViewModel {
     private final MutableLiveData<List<Contact>> contactList = new MutableLiveData<>();
     private final HashMap<String, Contact> contactHashMap = new HashMap<>();
     private final MutableLiveData<String> currentUid = new MutableLiveData<>();
+    private Navigator navigator;
+
+    public void setNavigator(Navigator navigator) {
+        this.navigator = navigator;
+    }
+
 
     @Inject
     public SearchViewModel(DatabaseRepository databaseRepository) {
         this.databaseRepository = databaseRepository;
+    }
+
+    public Navigator getNavigator() {
+        return navigator;
     }
 
     public MutableLiveData<String> getCurrentUid() {
@@ -136,9 +148,38 @@ public class SearchViewModel extends ViewModel {
             });
     }
 
+    public LiveData<Boolean> sendFriendRequest(ContactWrapInfo contactWrapInfo, String sender) {
+        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
+        databaseRepository.sendFriendRequest(contactWrapInfo, sender)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        disposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        mutableLiveData.setValue(true);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Debug.log("sendFriendRequest", e.getMessage());
+                        mutableLiveData.setValue(false);
+                    }
+                });
+        return mutableLiveData;
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
         disposable.clear();
+    }
+
+    public interface Navigator {
+        void sendFriendRequest(int position, ContactWrapInfo contactWrapInfo);
     }
 }
