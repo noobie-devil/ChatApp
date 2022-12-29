@@ -175,7 +175,7 @@
                             android:id="@+id/imv_avatar_in_intro_view"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/image_01"
+                            android:src="@drawable/ic_default_user"
                             android:scaleType="centerCrop"
                             app:shapeAppearanceOverlay="@style/Circular"
                             />
