@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
@@ -30,8 +31,13 @@ import java.util.Objects;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    public static final int VIEW_TYPE_SENT = 1;
-    public static final int VIEW_TYPE_RECEIVED = 2;
+    public static final int VIEW_TYPE_SEND_MESSAGE = 1;
+    public static final int VIEW_TYPE_RECEIVE_MESSAGE = 2;
+    public static final int VIEW_TYPE_SEND_CALL = 3;
+    public static final int VIEW_TYPE_RECEIVE_CALL = 4;
+    public static final int VIEW_TYPE_SEND_VIDEO_CALL = 5;
+    public static final int VIEW_TYPE_RECEIVE_VIDEO_CALL = 6;
+
     final Context context;
     final MessageViewModel viewModel;
     final CompositeDisposable disposable = new CompositeDisposable();
@@ -59,12 +65,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
-        if(viewType == VIEW_TYPE_SENT) {
+        if(viewType == VIEW_TYPE_SEND_MESSAGE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_sender_role, parent, false);
             return new SendMessageViewHolder(view);
-        } else if(viewType == VIEW_TYPE_RECEIVED) {
+        } else if(viewType == VIEW_TYPE_RECEIVE_MESSAGE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_message_receiver_role, parent, false);
             return new ReceiverMessageViewHolder(view);
+        } else if(viewType == VIEW_TYPE_SEND_CALL || viewType == VIEW_TYPE_SEND_VIDEO_CALL) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_call_sender_role, parent, false);
+            return new SendCallViewHolder(view);
+        } else if(viewType == VIEW_TYPE_RECEIVE_CALL || viewType == VIEW_TYPE_RECEIVE_VIDEO_CALL) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_call_receiver_role, parent, false);
+            return new ReceiveCallViewHolder(view);
         }
         return null;
     }
@@ -72,22 +84,31 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MessageWrapper messageWrapper = getItem(position);
-        if(getItemViewType(position) == VIEW_TYPE_SENT) {
+        if(getItemViewType(position) == VIEW_TYPE_SEND_MESSAGE) {
             ((SendMessageViewHolder) holder).bindData(position, messageWrapper.getMessage());
-        } else if(getItemViewType(position) == VIEW_TYPE_RECEIVED) {
+        } else if(getItemViewType(position) == VIEW_TYPE_RECEIVE_MESSAGE) {
             ((ReceiverMessageViewHolder) holder).bindData(position, messageWrapper.getMessage());
+        } else if(getItemViewType(position) == VIEW_TYPE_SEND_CALL) {
+            ((SendCallViewHolder) holder).bindData(messageWrapper.getMessage());
+        } else if(getItemViewType(position) == VIEW_TYPE_RECEIVE_CALL) {
+            ((ReceiveCallViewHolder) holder).bindData(messageWrapper.getMessage());
+        } else if(getItemViewType(position) == VIEW_TYPE_SEND_VIDEO_CALL) {
+            ((SendCallViewHolder) holder).bindData(messageWrapper.getMessage());
+        } else if(getItemViewType(position) == VIEW_TYPE_RECEIVE_VIDEO_CALL) {
+            ((ReceiveCallViewHolder) holder).bindData(messageWrapper.getMessage());
         }
     }
 
     @Override
     public int getItemViewType(int position) {
         MessageWrapper messageWrapper = getItem(position);
+        boolean sender = messageWrapper.getMessage().getSender().equals(viewModel.getUidLiveData().getValue());
         if(messageWrapper.getMessage().getType().equals(Constants.KEY_TYPE_TEXT)) {
-            if(messageWrapper.getMessage().getSender().equals(viewModel.getUidLiveData().getValue())) {
-                return VIEW_TYPE_SENT;
-            } else {
-                return VIEW_TYPE_RECEIVED;
-            }
+            return sender ? VIEW_TYPE_SEND_MESSAGE : VIEW_TYPE_RECEIVE_MESSAGE;
+        } else if(messageWrapper.getMessage().getType().equals(Constants.KEY_TYPE_CALL)) {
+            return sender ? VIEW_TYPE_SEND_CALL : VIEW_TYPE_RECEIVE_CALL;
+        } else if(messageWrapper.getMessage().getType().equals(Constants.KEY_TYPE_VIDEO_CALL)) {
+            return sender ? VIEW_TYPE_SEND_VIDEO_CALL : VIEW_TYPE_RECEIVE_VIDEO_CALL;
         }
         return super.getItemViewType(position);
 
@@ -166,6 +187,89 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             cvContainerMessage.setOnClickListener(v -> {
                 txvDateSend.setVisibility(txvDateSend.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
             });
+        }
+    }
+
+    class SendCallViewHolder extends RecyclerView.ViewHolder {
+        final MaterialTextView txvTitleCallType;
+        final MaterialTextView txvDateSend;
+        final MaterialCardView cvContainerMessage;
+        final MaterialButton iconCallType;
+        final MaterialTextView txvCallTime;
+
+        public SendCallViewHolder(@NonNull View itemView) {
+            super(itemView);
+            txvTitleCallType = itemView.findViewById(R.id.txv_title_call_type);
+            txvDateSend = itemView.findViewById(R.id.txv_date_send);
+            cvContainerMessage = itemView.findViewById(R.id.cv_container_message);
+            iconCallType = itemView.findViewById(R.id.icon_call_type);
+            txvCallTime = itemView.findViewById(R.id.txv_call_time);
+        }
+
+        public void bindData(Message message) {
+            if(message.getType().equals(Constants.KEY_TYPE_CALL)) {
+                txvTitleCallType.setText(context.getString(R.string.title_outgoing_call));
+                iconCallType.setIconResource(R.drawable.ic_phone_solid);
+            } else {
+                txvTitleCallType.setText(context.getString(R.string.title_outgoing_video_call));
+                iconCallType.setIconResource(R.drawable.ic_video_solid);
+            }
+            txvCallTime.setText(message.getMessage());
+            txvDateSend.setText(Common.getReadableTime(message.getSendAt()));
+            cvContainerMessage.setOnClickListener(v -> {
+                showHideDateSendAnim();
+            });
+        }
+
+        private void showHideDateSendAnim() {
+            txvDateSend.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ValueAnimator animator = null;
+            if(txvDateSend.getHeight() == 0) {
+                animator = ValueAnimator.ofInt(0, txvDateSend.getMeasuredHeight());
+            } else {
+                animator = ValueAnimator.ofInt(txvDateSend.getMeasuredHeight(), 0);
+            }
+            animator.addUpdateListener(animation -> {
+                txvDateSend.getLayoutParams().height = (int) animation.getAnimatedValue();
+                txvDateSend.requestLayout();
+            });
+            animator.setDuration(300);
+            animator.setInterpolator(new DecelerateInterpolator());
+            animator.start();
+        }
+    }
+
+    class ReceiveCallViewHolder extends RecyclerView.ViewHolder {
+
+        final MaterialTextView txvTitleCallType;
+        final MaterialTextView txvDateSend;
+        final MaterialCardView cvContainerMessage;
+        final MaterialButton iconCallType;
+        final MaterialTextView txvCallTime;
+        final ShapeableImageView imvAvatar;
+
+        public ReceiveCallViewHolder(@NonNull View itemView) {
+            super(itemView);
+            txvTitleCallType = itemView.findViewById(R.id.txv_title_call_type);
+            txvDateSend = itemView.findViewById(R.id.txv_date_send);
+            cvContainerMessage = itemView.findViewById(R.id.cv_container_message);
+            iconCallType = itemView.findViewById(R.id.icon_call_type);
+            txvCallTime = itemView.findViewById(R.id.txv_call_time);
+            imvAvatar = itemView.findViewById(R.id.imv_avatar);
+
+        }
+
+        public void bindData(Message message) {
+            if(message.getType().equals(Constants.KEY_TYPE_CALL)) {
+                txvTitleCallType.setText(context.getString(R.string.title_incoming_call));
+                iconCallType.setIconResource(R.drawable.ic_phone_solid);
+            } else {
+                txvTitleCallType.setText(context.getString(R.string.title_incoming_video_call));
+                iconCallType.setIconResource(R.drawable.ic_video_solid);
+            }
+            txvCallTime.setText(message.getMessage());
+            txvDateSend.setText(Common.getReadableTime(message.getSendAt()));
+
         }
     }
 

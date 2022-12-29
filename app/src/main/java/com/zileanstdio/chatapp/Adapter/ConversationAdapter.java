@@ -2,6 +2,7 @@ package com.zileanstdio.chatapp.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -177,11 +178,36 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 //            } else {
 //                this.txvName.setText(contactProfile.getUserName());
 //            }
+            Debug.log("bindData", conversationWrapper.getConversation().toString());
+            if(conversationWrapper.getConversation().getTypeMessage().equals(Constants.KEY_TYPE_CALL)) {
+                if(conversationWrapper.getConversation().getLastSender().equals(CipherUtils.Hash.sha256(contact.getNumberPhone()))) {
+                    txvLastMessage.setText(context.getString(R.string.title_incoming_call));
+                } else {
+                    txvLastMessage.setText(context.getString(R.string.title_outgoing_call));
+                }
+//                txvLastMessage.setCompoundDrawables(context.getDrawable(R.drawable.ic_phone_solid), null, null, null);
+//                txvLastMessage.setCompoundDrawablePadding(com.intuit.sdp.R.dimen._8sdp);
+//                for(Drawable drawable: txvLastMessage.getCompoundDrawables()) {
+//                    if(drawable != null)
+//                        drawable.setTint(com.google.android.material.R.attr.colorOutline);
+//                }
+            } else if(conversationWrapper.getConversation().getTypeMessage().equals(Constants.KEY_TYPE_VIDEO_CALL)) {
+                if(conversationWrapper.getConversation().getLastSender().equals(CipherUtils.Hash.sha256(contact.getNumberPhone()))) {
+                    txvLastMessage.setText(context.getString(R.string.title_incoming_video_call));
 
-            if(conversationWrapper.getConversation().getTypeMessage().equals(Constants.KEY_TYPE_RECORD)) {
-                this.txvLastMessage.setText(context.getResources().getString(R.string.recent_message_type_record));
+                } else {
+                    txvLastMessage.setText(context.getString(R.string.title_outgoing_video_call));
+
+                }
+//                txvLastMessage.setCompoundDrawables(context.getDrawable(R.drawable.ic_video_solid), null, null, null);
+//                txvLastMessage.setCompoundDrawablePadding(com.intuit.sdp.R.dimen._8sdp);
+//                for(Drawable drawable: txvLastMessage.getCompoundDrawables()) {
+//                    if(drawable != null)
+//                        drawable.setTint(com.google.android.material.R.attr.colorOutline);
+//                }
             } else {
                 this.txvLastMessage.setText(conversationWrapper.getConversation().getLastMessage());
+//                txvLastMessage.setCompoundDrawables(null, null, null, null);
             }
             this.txvDateSend.setText(Common.getReadableTime(conversationWrapper.getConversation().getLastUpdated()));
             if(contactProfile.getAvatarImageUrl() == null) {

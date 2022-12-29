@@ -13,40 +13,59 @@
     android:clickable="true"
     android:focusable="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        >
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_avatar"
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:layout_marginBottom="@dimen/_7sdp"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            app:cardCornerRadius="100dp">
-
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.18"
+            >
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imv_avatar"
-                android:layout_width="66dp"
-                android:layout_height="66dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_default_user" />
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:shapeAppearanceOverlay="@style/Circular"
+                android:src="@drawable/ic_default_user"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
 
-        </androidx.cardview.widget.CardView>
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/cv_avatar"-->
+<!--            android:layout_width="66dp"-->
+<!--            android:layout_height="66dp"-->
+<!--            android:layout_marginBottom="@dimen/_7sdp"-->
+<!--            android:layout_marginTop="@dimen/_10sdp"-->
+<!--            android:layout_alignParentStart="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            app:cardCornerRadius="100dp">-->
+
+<!--            <com.google.android.material.imageview.ShapeableImageView-->
+<!--                android:id="@+id/imv_avatar"-->
+<!--                android:layout_width="66dp"-->
+<!--                android:layout_height="66dp"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ic_default_user" />-->
+
+<!--        </androidx.cardview.widget.CardView>-->
 
         <LinearLayout
             android:id="@+id/view_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.52"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingStart="@dimen/_10sdp"
-            android:paddingEnd="@dimen/_10sdp"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/btn_add_friend"
-            android:layout_toEndOf="@id/cv_avatar">
+            android:paddingEnd="@dimen/_10sdp">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txv_name"
@@ -55,6 +74,8 @@
                 android:layout_marginBottom="@dimen/_2sdp"
                 android:text="@string/user_text"
                 android:textSize="@dimen/_13sdp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceLabelLarge" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -64,20 +85,27 @@
                 android:layout_marginTop="@dimen/_2sdp"
                 android:text="@string/text_phone_number"
                 android:textSize="@dimen/_13sdp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceLabelLarge" />
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:gravity="center"
+            >
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_friend"
+                android:backgroundTint="?attr/colorOnTertiary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_friend_text"
+                android:textColor="@color/white"/>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_friend"
-            android:backgroundTint="?attr/colorOnTertiary"
-            android:layout_width="@dimen/_77sdp"
-            android:layout_height="wrap_content"
-            android:text="@string/add_friend_text"
-            android:textColor="@color/white"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

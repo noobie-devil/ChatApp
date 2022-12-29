@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.firebase.FirebaseNetworkException;
 import com.zileanstdio.chatapp.Data.repository.AuthRepository;
 import com.zileanstdio.chatapp.Utils.StateResource;
 
@@ -22,6 +23,12 @@ public class StartViewModel extends ViewModel {
     private final AuthRepository authRepository;
     private final MediatorLiveData<StateResource> onCheckLoginUser = new MediatorLiveData<>();
     private final CompositeDisposable disposable = new CompositeDisposable();
+
+    private Navigator navigator;
+
+    public void setNavigator(Navigator navigator) {
+        this.navigator = navigator;
+    }
 
     @Inject
     public StartViewModel(AuthRepository authRepository) {
@@ -51,7 +58,11 @@ public class StartViewModel extends ViewModel {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         String message = "";
-                        if (e.getMessage() != null) {
+
+                        if(e instanceof FirebaseNetworkException) {
+                            navigator.handleNetworkError(e.getMessage());
+                            message = e.getMessage();
+                        } else if (e.getMessage() != null) {
                             message = e.getMessage();
                         }
                         onCheckLoginUser.setValue(StateResource.error(message));
@@ -67,5 +78,9 @@ public class StartViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         disposable.clear();
+    }
+
+    public interface Navigator {
+        public void handleNetworkError(String msg);
     }
 }

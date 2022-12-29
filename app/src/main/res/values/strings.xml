@@ -64,5 +64,13 @@
     <string name="button_answer">Button Answer</string>
     <string name="button_reject">Button Reject</string>
 
+    <string name="time_unit_second">giây</string>
+    <string name="time_unit_minute">phút</string>
+    <string name="time_unit_hour">giờ</string>
+
+    <string name="title_outgoing_call">Cuộc gọi thoại</string>
+    <string name="title_incoming_call">Cuộc gọi thoại đến</string>
+    <string name="title_outgoing_video_call">Cuộc gọi video</string>
+    <string name="title_incoming_video_call">Cuộc gọi video đến</string>
 
 </resources>

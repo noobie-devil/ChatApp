@@ -1,10 +1,5 @@
 package com.zileanstdio.chatapp.DataSource.remote;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -13,14 +8,11 @@ import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.zileanstdio.chatapp.Data.model.Contact;
 import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
-import com.zileanstdio.chatapp.Data.model.Conversation;
 import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
-import com.zileanstdio.chatapp.Data.model.FriendRequest;
 import com.zileanstdio.chatapp.Data.model.Message;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.Utils.CipherUtils;
@@ -29,12 +21,9 @@ import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -322,7 +311,34 @@ public class FirestoreDBSource {
         }, BackpressureStrategy.BUFFER);
     }
 
-
+    public Single<HashMap<String, Contact>> getContactList(final String uid) {
+        return Single.create(emitter -> {
+            firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
+                    .document(uid)
+                    .collection(Constants.KEY_COLLECTION_CONTACTS)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if(queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty())
+                        {
+                            if(queryDocumentSnapshots.size() > 0) {
+                                HashMap<String, Contact> hashMap = new HashMap<>();
+                                for(DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                    Contact contact = documentSnapshot.toObject(Contact.class);
+                                    if(contact != null) {
+                                        hashMap.put(contact.getNumberPhone(), contact);
+                                    }
+                                }
+                                emitter.onSuccess(hashMap);
+                            } else {
+                                emitter.onSuccess(new HashMap<>());
+                            }
+                        } else {
+                            emitter.onSuccess(new HashMap<>());
+                        }
+                    })
+                    .addOnFailureListener(emitter::onError);
+        });
+    }
 
     public Flowable<Contact> getContacts(final String uid) {
         return Flowable.create(emitter -> {
@@ -414,33 +430,6 @@ public class FirestoreDBSource {
         });
     }
 
-//    public Single<List<ContactWrapInfo>> getRequests(final String uid) {
-//        return Single.create(emitter -> {
-//            firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
-//                    .document(uid)
-//                    .collection(Constants.KEY_COLLECTION_CONTACTS)
-//                    .get()
-//                    .addOnSuccessListener(queryDocumentSnapshots -> {
-//                        List<ContactWrapInfo> infoList = new ArrayList<>();
-//                        if(queryDocumentSnapshots != null) {
-//                            for(DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-//                                Contact contact = snapshot.toObject(Contact.class);
-//                                firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
-//                                        .document(CipherUtils.Hash.sha256(contact.getNumberPhone()))
-//                                        .get()
-//                                                .addOnSuccessListener(documentSnapshot -> {
-//                                                    if(documentSnapshot.exists()) {
-//                                                        User user = documentSnapshot.toObject(User.class);
-//
-//                                                    }
-//                                                })
-//                                infoList.add(snapshot.toObject())
-//                            }
-//                        }
-//                    })
-//        })
-//    }
-
     public Flowable<ContactWrapInfo> listenRequest(final String uid) {
         return Flowable.create(emitter -> {
             final ListenerRegistration registration = firebaseFirestore.collection(Constants.KEY_COLLECTION_USERS)
@@ -483,7 +472,6 @@ public class FirestoreDBSource {
             emitter.setCancellable(registration::remove);
         }, BackpressureStrategy.BUFFER);
     }
-}
 
     public Completable sendCallMessage(final ConversationWrapper conversation, final Message message) {
         return Completable.create(emitter -> {

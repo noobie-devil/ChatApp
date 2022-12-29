@@ -1,7 +1,10 @@
 package com.zileanstdio.chatapp.Utils;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+
+import com.zileanstdio.chatapp.R;
 
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
@@ -21,6 +24,29 @@ public class Common {
         else {
             return new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
         }
+    }
+
+    public static String computeCallTime(Date start, Date end, Context context) {
+
+        String time = "undefined";
+        if(start == null || end == null) {
+            time = "0 " + context.getString(R.string.time_unit_second);
+        } else {
+            long timeDiff = Math.abs(start.getTime() - end.getTime());
+            long secondsDiff = TimeUnit.SECONDS.convert(timeDiff, TimeUnit.MILLISECONDS);
+            if(secondsDiff >= 3600) {
+                time = String.format("%s %s", Math.round((float)secondsDiff/3600), context.getString(R.string.time_unit_hour));
+            } else if(secondsDiff > 60) {
+                time = String.format("%s %s", Math.round((float) secondsDiff / 60), context.getString(R.string.time_unit_minute));
+            } else if(secondsDiff <= 60) {
+                time = secondsDiff != 60 ? secondsDiff + " " + context.getString(R.string.time_unit_second) : "1 " + context.getString(R.string.time_unit_minute);
+            } else {
+
+            }
+        }
+
+
+        return time;
     }
 
     public static String removeAccent(String s) {

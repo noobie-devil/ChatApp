@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthCredential;
@@ -169,15 +170,24 @@ public class FirebaseAuthSource {
             } else {
                 // Kiểm tra tài khoản người dùng còn hợp lệ
                 firebaseAuth.fetchSignInMethodsForEmail(user.getEmail()).addOnCompleteListener(task -> {
-                    if (task.getResult().getSignInMethods() != null && task.getResult().getSignInMethods().isEmpty()) {
-                        firebaseAuth.signOut();
-                        Debug.log("checkLoginUser", "UNKNOWN_USER");
-                        emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
-                                "Không thể xác nhận tài khoản.\nVui lòng đăng nhập lại!"));
+                    if(task.isSuccessful()) {
+                        if (task.getResult().getSignInMethods() != null && task.getResult().getSignInMethods().isEmpty()) {
+                            firebaseAuth.signOut();
+                            Debug.log("checkLoginUser", "UNKNOWN_USER");
+                            emitter.onError(new UserException(UserException.ErrorType.UNKNOWN_USER,
+                                    "Không thể xác nhận tài khoản.\nVui lòng đăng nhập lại!"));
+                        } else {
+                            Debug.log("checkLoginUser", "SUCCESS");
+                            emitter.onComplete();
+                        }
                     } else {
-                        Debug.log("checkLoginUser", "SUCCESS");
-                        emitter.onComplete();
+                        if(task.getException() != null) {
+                            if(task.getException() instanceof FirebaseNetworkException) {
+                                emitter.onError(task.getException());
+                            }
+                        }
                     }
+
                 });
             }
         });

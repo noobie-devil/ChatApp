@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -31,6 +32,11 @@ public class OutgoingCallViewModel extends ViewModel {
     private final DatabaseRepository databaseRepository;
     private final MediatorLiveData<User> userTo = new MediatorLiveData<>();
     private final CompositeDisposable disposable = new CompositeDisposable();
+    private Navigator navigator;
+
+    public void setNavigator(Navigator navigator) {
+        this.navigator = navigator;
+    }
 
     @Inject
     public OutgoingCallViewModel(DatabaseRepository databaseRepository) {
@@ -69,26 +75,49 @@ public class OutgoingCallViewModel extends ViewModel {
     }
 
     public void sendCallMessage(ConversationWrapper conversationWrapper, Message message) {
-        databaseRepository.sendCallMessage(conversationWrapper, message).subscribeOn(Schedulers.io())
+        databaseRepository.sendMessage(conversationWrapper, message)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletableObserver() {
-
+                .subscribe(new SingleObserver<ConversationWrapper>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         disposable.add(d);
                     }
 
                     @Override
-                    public void onComplete() {
-                        Debug.log(TAG + ":sendMessage:onComplete", "Send message successfully");
+                    public void onSuccess(@NonNull ConversationWrapper conversationWrapper) {
+                        navigator.notifySendCallMessageSuccess(conversationWrapper);
+                        Debug.log(TAG + ":sendCallMessage:onSuccess", "Send call message successfully");
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Debug.log(TAG + ":sendMessage:onError", e.getMessage());
+                        Debug.log(TAG + ":sendCallMessage:onError", e.getMessage());
                     }
                 });
     }
+
+//    public void sendCallMessage(ConversationWrapper conversationWrapper, Message message) {
+//        databaseRepository.sendCallMessage(conversationWrapper, message).subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new CompletableObserver() {
+//
+//                    @Override
+//                    public void onSubscribe(@NonNull Disposable d) {
+//                        disposable.add(d);
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//                        Debug.log(TAG + ":sendMessage:onComplete", "Send message successfully");
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull Throwable e) {
+//                        Debug.log(TAG + ":sendMessage:onError", e.getMessage());
+//                    }
+//                });
+//    }
 
     public LiveData<User> getUser() {
         return userTo;
@@ -98,5 +127,9 @@ public class OutgoingCallViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         disposable.clear();
+    }
+
+    public interface Navigator {
+        public void notifySendCallMessageSuccess(ConversationWrapper conversationWrapper);
     }
 }

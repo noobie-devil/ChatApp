@@ -1,6 +1,9 @@
 package com.zileanstdio.chatapp.Ui.message;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,6 +25,7 @@ import com.zileanstdio.chatapp.Adapter.MessageAdapter;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.Data.model.Contact;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.Conversation;
 import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.Data.model.Message;
@@ -57,8 +62,7 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
     private MaterialTextView txvOnlineStatus;
 
     private MaterialButton btnCallVoice, btnCallVideo;
-    private final CompositeDisposable disposable = new CompositeDisposable();
-
+    private BroadcastReceiver broadcastReceiver;
 
     @Override
     public MessageViewModel getViewModel() {
@@ -144,6 +148,21 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
             }
         }
 
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()) {
+                    case OutgoingCallActivity.SEND_CALL_MESSAGE_SUCCESS:
+                        if(intent.hasExtra("conversation") && intent.getSerializableExtra("conversation") != null) {
+                            viewModel.getConversationLiveData().postValue((ConversationWrapper) intent.getSerializableExtra("conversation"));
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
         viewModel.getConversationLiveData().observe(this, conversationWrapper -> {
             Debug.log("getConversationLiveData", conversationWrapper.getDocumentId());
 //            Debug.log("getConversationLiveData:currentConversationWrapper", currentConversationWrapper.getDocumentId());
@@ -196,96 +215,81 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
 
             }
         });
-//        viewModel.getDisposable().add(RxView.clicks(btnSendMessage)
-//                .debounce(200, TimeUnit.MILLISECONDS)
-//                .subscribe(unit -> {
-//                    if(edtMessage.getText() != null && edtMessage.getText().toString().trim().length() > 0) {
-//                        Message message = new Message(currentUid,
-//                                Conversation.Type.TEXT.label,
-//                                edtMessage.getText().toString().trim(),
-//                                new Date());
-//                        if(currentConversationWrapper != null) {
-//                            Debug.log("listenSendEvent", "currentConversationWrapper != null");
-//                            currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.TEXT.label);
-//                            currentConversationWrapper.getConversation().setLastSender(currentUid);
-//                            currentConversationWrapper.getConversation().setLastMessage(edtMessage.getText().toString().trim());
-//                            edtMessage.getText().clear();
-//                            currentConversationWrapper.getConversation().setLastUpdated(new Date());
-//                            viewModel.sendMessage(currentConversationWrapper, message);
-//                        } else {
-//                            Debug.log("listenSendEvent", "currentConversationWrapper = null");
-//                            Conversation conversation = Conversation.TEXT;
-//                            conversation.setLastMessage(edtMessage.getText().toString().trim());
-//                            edtMessage.getText().clear();
-//                            conversation.setLastSender(currentUid);
-//                            conversation.setLastUpdated(new Date());
-//                            conversation.setCreatedAt(new Date());
-//                            conversation.setUserJoined(new ArrayList<String>(){{
-//                                add(currentUid);
-//                                add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
-//                            }});
-//
-//                            final ConversationWrapper conversationWrapper = new ConversationWrapper(null, conversation);
-//                            viewModel.sendMessage(conversationWrapper, message);
-//                        }
-//
-//                    }
-//                    else{
-//
-//                    }
-//                })
-//        );
 
-        disposable.add(RxView.clicks(btnCallVoice).subscribe(unit -> {
-            if (currentConversationWrapper != null) {
-                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.CALL.label);
-                currentConversationWrapper.getConversation().setLastSender(currentUid);
-            } else {
-                Conversation conversation = Conversation.CALL;
-                conversation.setCreatedAt(new Date());
-                conversation.setLastSender(currentUid);
-                conversation.setUserJoined(new ArrayList<String>(){{
-                    add(currentUid);
-                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
-                }});
-                currentConversationWrapper = new ConversationWrapper(null, conversation);
+        viewModel.getDisposable().add(RxView.clicks(btnCallVoice).subscribe(unit -> {
+            if(Stringee.client.isConnected()) {
+                Intent intent = new Intent(this, OutgoingCallActivity.class);
+                Bundle bundle = new Bundle();
+                intent.putExtra("from", Stringee.client.getUserId());
+                intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+                intent.putExtra("video", false);
+                bundle.putSerializable("contact", new ContactWrapInfo(contact, contactProfile));
+                bundle.putSerializable("conversation", currentConversationWrapper);
+                intent.putExtras(bundle);
+                startActivity(intent);
             }
+//            if (currentConversationWrapper != null) {
+//                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.CALL.label);
+//                currentConversationWrapper.getConversation().setLastSender(currentUid);
+//            } else {
+//                Conversation conversation = Conversation.CALL;
+//                conversation.setCreatedAt(new Date());
+//                conversation.setLastSender(currentUid);
+//                conversation.setUserJoined(new ArrayList<String>(){{
+//                    add(currentUid);
+//                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+//                }});
+//                currentConversationWrapper = new ConversationWrapper(null, conversation);
+//            }
 
-            Intent intent = new Intent(this, OutgoingCallActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("conversation", currentConversationWrapper);
-            intent.putExtra("from", Stringee.client.getUserId());
-            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
-            intent.putExtra("video", false);
-            intent.putExtra("id", currentUid);
-            intent.putExtras(bundle);
-            startActivity(intent);
+//            Intent intent = new Intent(this, OutgoingCallActivity.class);
+//            Bundle bundle = new Bundle();
+//            bundle.putSerializable("conversation", currentConversationWrapper);
+//            intent.putExtra("from", Stringee.client.getUserId());
+//            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+//            intent.putExtra("video", false);
+//            intent.putExtra("id", currentUid);
+//            intent.putExtras(bundle);
+//            startActivity(intent);
         }));
 
-        disposable.add(RxView.clicks(btnCallVideo).subscribe(unit -> {
-            if (currentConversationWrapper != null) {
-                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.VIDEO_CALL.label);
-                currentConversationWrapper.getConversation().setLastSender(currentUid);
-            } else {
-                Conversation conversation = Conversation.VIDEO_CALL;
-                conversation.setCreatedAt(new Date());
-                conversation.setLastSender(currentUid);
-                conversation.setUserJoined(new ArrayList<String>(){{
-                    add(currentUid);
-                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
-                }});
-                currentConversationWrapper = new ConversationWrapper(null, conversation);
+        viewModel.getDisposable().add(RxView.clicks(btnCallVideo).subscribe(unit -> {
+
+            if(Stringee.client.isConnected()) {
+                Intent intent = new Intent(this, OutgoingCallActivity.class);
+                Bundle bundle = new Bundle();
+                intent.putExtra("from", Stringee.client.getUserId());
+                intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+                intent.putExtra("video", true);
+                bundle.putSerializable("contact", new ContactWrapInfo(contact, contactProfile));
+                bundle.putSerializable("conversation", currentConversationWrapper);
+                intent.putExtras(bundle);
+                startActivity(intent);
             }
 
-            Intent intent = new Intent(this, OutgoingCallActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("conversation", currentConversationWrapper);
-            intent.putExtra("from", Stringee.client.getUserId());
-            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
-            intent.putExtra("video", true);
-            intent.putExtra("id", currentUid);
-            intent.putExtras(bundle);
-            startActivity(intent);
+//            if (currentConversationWrapper != null) {
+//                currentConversationWrapper.getConversation().setTypeMessage(Conversation.Type.VIDEO_CALL.label);
+//                currentConversationWrapper.getConversation().setLastSender(currentUid);
+//            } else {
+//                Conversation conversation = Conversation.VIDEO_CALL;
+//                conversation.setCreatedAt(new Date());
+//                conversation.setLastSender(currentUid);
+//                conversation.setUserJoined(new ArrayList<String>(){{
+//                    add(currentUid);
+//                    add(CipherUtils.Hash.sha256(contactProfile.getPhoneNumber()));
+//                }});
+//                currentConversationWrapper = new ConversationWrapper(null, conversation);
+//            }
+//
+//            Intent intent = new Intent(this, OutgoingCallActivity.class);
+//            Bundle bundle = new Bundle();
+//            bundle.putSerializable("conversation", currentConversationWrapper);
+//            intent.putExtra("from", Stringee.client.getUserId());
+//            intent.putExtra("to", "." + contactProfile.getPhoneNumber());
+//            intent.putExtra("video", true);
+//            intent.putExtra("id", currentUid);
+//            intent.putExtras(bundle);
+//            startActivity(intent);
         }));
 
 
@@ -342,4 +346,16 @@ public class MessageActivity extends BaseActivity<MessageViewModel> {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(broadcastReceiver, new IntentFilter(OutgoingCallActivity.SEND_CALL_MESSAGE_SUCCESS));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
 }

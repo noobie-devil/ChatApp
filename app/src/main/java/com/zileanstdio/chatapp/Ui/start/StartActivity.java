@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.R;
@@ -28,7 +29,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
-public class StartActivity extends BaseActivity {
+public class StartActivity extends BaseActivity<StartViewModel> implements StartViewModel.Navigator {
 
     private boolean isLogin = false;
     private int STATUS = 0;
@@ -36,10 +37,8 @@ public class StartActivity extends BaseActivity {
     BehaviorSubject<Boolean> animateLoading = BehaviorSubject.createDefault(false);
     BehaviorSubject<Boolean> checkLoginState = BehaviorSubject.createDefault(false);
 
-    private final CompositeDisposable disposable = new CompositeDisposable();
-
     @Override
-    public ViewModel getViewModel() {
+    public StartViewModel getViewModel() {
         if (viewModel == null) {
             viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(StartViewModel.class);
         }
@@ -65,7 +64,7 @@ public class StartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        viewModel.setNavigator(this);
         ImageView imageIcon = findViewById(R.id.image_icon);
         ProgressBar progressWait = findViewById(R.id.progress_wait);
         TextView textName = findViewById(R.id.text_name);
@@ -80,7 +79,7 @@ public class StartActivity extends BaseActivity {
         AnimatorSet animateImage = new AnimatorSet();
         animateImage.play(scaleImageX).with(scaleImageY).with(translationImageY);
 
-        disposable.add(BehaviorSubject.combineLatest(
+        viewModel.getDisposable().add(BehaviorSubject.combineLatest(
                 animateLoading,
                 checkLoginState,
                 (state1, state2) -> state1 && state2
@@ -114,25 +113,13 @@ public class StartActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        disposable.clear();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposable.dispose();
-    }
-
-    @Override
     public void onClick(View view) {
 
     }
 
     public void subscribeObservers() {
         // Lắng nghe kết quả trả về từ quá trình kiểm tra User
-        ((StartViewModel) viewModel).observeCheckLoginUser().observe(this, stateResource -> {
+        viewModel.observeCheckLoginUser().observe(this, stateResource -> {
             if (stateResource != null) {
                 switch (stateResource.status) {
                     case SUCCESS:
@@ -159,15 +146,24 @@ public class StartActivity extends BaseActivity {
     private void transferActivity() {
         // Đợi hoàn thành 'chuyển động' + 'kiểm tra User' -> chuyển Activity khi cả 2 hoàn thành
 //        if (STATUS == 2) {
-            Intent intent;
-            if (isLogin) {
-                intent = new Intent(this, MainActivity.class);
-            } else {
-                intent = new Intent(this, AuthActivity.class);
-            }
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            startActivity(intent);
-            finish();
+        Intent intent;
+        if (isLogin) {
+            intent = new Intent(this, MainActivity.class);
+        } else {
+            intent = new Intent(this, AuthActivity.class);
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        startActivity(intent);
+        finish();
 //        }
+    }
+
+    @Override
+    public void handleNetworkError(String msg) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Error")
+                .setMessage(msg)
+                .setPositiveButton("Got it", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }

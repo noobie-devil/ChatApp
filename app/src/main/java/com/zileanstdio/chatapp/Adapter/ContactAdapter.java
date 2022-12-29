@@ -195,6 +195,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                         intent.putExtra("to", "." + contactWrapInfo.getUser().getPhoneNumber());
                         intent.putExtra("video", false);
                         bundle.putSerializable("contact", contactWrapInfo);
+                        bundle.putSerializable("conversation", conversationWrapper.get());
                         intent.putExtras(bundle);
                         context.startActivity(intent);
                     }
@@ -210,6 +211,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                         intent.putExtra("to", "." + contactWrapInfo.getUser().getPhoneNumber());
                         intent.putExtra("video", true);
                         bundle.putSerializable("contact", contactWrapInfo);
+                        bundle.putSerializable("conversation", conversationWrapper.get());
                         intent.putExtras(bundle);
                         context.startActivity(intent);
                     }

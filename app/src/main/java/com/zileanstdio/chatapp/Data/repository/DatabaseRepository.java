@@ -63,6 +63,10 @@ public class DatabaseRepository {
         return firestoreDBSource.getContacts(uid);
     }
 
+    public Single<HashMap<String, Contact>> getSingleContactList(String uid) {
+        return firestoreDBSource.getContactList(uid);
+    }
+
     public Flowable<ContactWrapInfo> syncLocalContact(HashMap<String, String> localContact, String uid) {
         return firestoreDBSource.syncLocalContact(localContact, uid);
     }

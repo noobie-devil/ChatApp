@@ -22,6 +22,7 @@ import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @SuppressLint({"NotifyDataSetChanged", "ClickableViewAccessibility", "SetTextI18n"})
-public class SearchActivity extends BaseActivity {
+public class SearchActivity extends BaseActivity<SearchViewModel> {
 
     private Integer status = 0;
     private String userName;
@@ -46,7 +47,6 @@ public class SearchActivity extends BaseActivity {
 
     private SearchAdapter searchAdapter;
     private final List<User> users = new ArrayList<>();
-    private final CompositeDisposable disposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,18 +82,6 @@ public class SearchActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        disposable.clear();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposable.dispose();
-    }
-
-    @Override
     public void initAppBar() {
         super.initAppBar();
         setTitleToolbar("Tìm kiếm");
@@ -101,7 +89,7 @@ public class SearchActivity extends BaseActivity {
     }
 
     @Override
-    public ViewModel getViewModel() {
+    public SearchViewModel getViewModel() {
         if (viewModel == null) {
             viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(SearchViewModel.class);
         }
@@ -135,14 +123,22 @@ public class SearchActivity extends BaseActivity {
         searchView = findViewById(R.id.search_view);
         rcvSearchResult = findViewById(R.id.rcv_search_result);
 
-        searchAdapter = new SearchAdapter();
+        searchAdapter = new SearchAdapter(this, viewModel);
         rcvSearchResult.setHasFixedSize(true);
         rcvSearchResult.setLayoutManager(new LinearLayoutManager(this));
         rcvSearchResult.setItemAnimator(new DefaultItemAnimator());
         rcvSearchResult.setAdapter(searchAdapter);
 
         userName = getIntent().getStringExtra("userName");
+        viewModel.getCurrentUid().observe(this, s -> {
+            if(s != null) {
+                viewModel.loadContacts(s);
+            }
+        });
         phoneNumber = getIntent().getStringExtra("phoneNumber");
+        if(phoneNumber != null) {
+            viewModel.getCurrentUid().postValue(CipherUtils.Hash.sha256(phoneNumber));
+        }
     }
 
     public void clearSearch() {
@@ -184,11 +180,12 @@ public class SearchActivity extends BaseActivity {
     }
 
     public void subscribeObserver() {
-        ((SearchViewModel) viewModel).getListUser().observe(this, user -> {
+        viewModel.getListUser().observe(this, user -> {
             if ((user.getUserName() == null) || (user.getPhoneNumber() == null) ) {
                 searchWithoutData();
             } else {
                 if (!user.getUserName().equals(userName) && !user.getPhoneNumber().equals(phoneNumber)) {
+
                     users.add(user);
                     searchAdapter.setUsers(users);
                     searchWithData();

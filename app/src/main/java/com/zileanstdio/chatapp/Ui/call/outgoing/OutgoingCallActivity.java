@@ -3,8 +3,10 @@ package com.zileanstdio.chatapp.Ui.call.outgoing;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,11 +28,15 @@ import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.zileanstdio.chatapp.Base.BaseActivity;
 import com.zileanstdio.chatapp.Base.BaseFragment;
+import com.zileanstdio.chatapp.BaseApplication;
+import com.zileanstdio.chatapp.Data.model.ContactWrapInfo;
 import com.zileanstdio.chatapp.Data.model.Conversation;
 import com.zileanstdio.chatapp.Data.model.ConversationWrapper;
 import com.zileanstdio.chatapp.Data.model.Message;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Utils.CipherUtils;
 import com.zileanstdio.chatapp.Utils.Common;
+import com.zileanstdio.chatapp.Utils.Debug;
 import com.zileanstdio.chatapp.Utils.SensorUtils;
 import com.zileanstdio.chatapp.Utils.Stringee;
 
@@ -38,12 +44,14 @@ import org.json.JSONObject;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class OutgoingCallActivity extends BaseActivity {
-
+public class OutgoingCallActivity extends BaseActivity<OutgoingCallViewModel> implements OutgoingCallViewModel.Navigator {
+    public static final String SEND_CALL_MESSAGE_SUCCESS = "send_call_message_success";
     private final int REQUEST_PERMISSION = 1;
     private final String START = "Kết nối cuộc gọi";
     private final String STARTED = "Cuộc gọi đi";
@@ -54,7 +62,8 @@ public class OutgoingCallActivity extends BaseActivity {
 
     private String userTo;
     private String id;
-    private ConversationWrapper conversationWrapper;
+    private ConversationWrapper conversationWrapper = null;
+    private ContactWrapInfo contactWrapInfo = null;
     private LocalDateTime startTime = null;
     private boolean isVideoCall = false;
 
@@ -88,6 +97,7 @@ public class OutgoingCallActivity extends BaseActivity {
             setTurnScreenOn(true);
         }
         setContentView(R.layout.activity_outgoing_call);
+        viewModel.setNavigator(this);
 
         sensorUtils = SensorUtils.getInstance(this);
         sensorUtils.acquireProximitySensor(getLocalClassName());
@@ -97,7 +107,7 @@ public class OutgoingCallActivity extends BaseActivity {
         subscribeObserver();
         initView();
         initAction();
-        ((OutgoingCallViewModel) viewModel).setUserTo(userTo.substring(1));
+        viewModel.setUserTo(userTo.substring(1));
 
         if (!checkPermission()) {
             return;
@@ -106,7 +116,7 @@ public class OutgoingCallActivity extends BaseActivity {
     }
 
     @Override
-    public ViewModel getViewModel() {
+    public OutgoingCallViewModel getViewModel() {
         if (viewModel == null) {
             viewModel = new ViewModelProvider(getViewModelStore(), providerFactory).get(OutgoingCallViewModel.class);
         }
@@ -150,9 +160,21 @@ public class OutgoingCallActivity extends BaseActivity {
     }
 
     public void initAction() {
-        userTo = getIntent().getStringExtra("to");
-        id = getIntent().getStringExtra("id");
-        conversationWrapper = (ConversationWrapper) getIntent().getSerializableExtra("conversation");
+//        userTo = getIntent().getStringExtra("to");
+//        id = getIntent().getStringExtra("id");
+        if(getIntent().hasExtra("to")) {
+            userTo = getIntent().getStringExtra("to");
+        }
+        if(getIntent().hasExtra("from")) {
+            id = getIntent().getStringExtra("from");
+        }
+        if(getIntent().hasExtra("conversation")) {
+            conversationWrapper = (ConversationWrapper) getIntent().getSerializableExtra("conversation");
+        }
+        if(getIntent().hasExtra("contact")) {
+            contactWrapInfo = (ContactWrapInfo) getIntent().getSerializableExtra("contact");
+        }
+//        conversationWrapper = (ConversationWrapper) getIntent().getSerializableExtra("conversation");
         isVideoCall = getIntent().getBooleanExtra("video", false);
 
         isSpeaker = isVideoCall;
@@ -275,6 +297,7 @@ public class OutgoingCallActivity extends BaseActivity {
             @Override
             public void onSignalingStateChange(StringeeCall stringeeCall, final StringeeCall.SignalingState state, String reason, int sipCode, String sipReason) {
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    Debug.log(TAG + ":onSignalingStateChange", signalingState != null ? signalingState.toString() : "null");
                     signalingState = state;
                     switch (state) {
                         case RINGING:
@@ -301,6 +324,7 @@ public class OutgoingCallActivity extends BaseActivity {
             @Override
             public void onError(StringeeCall stringeeCall, int code, String desc) {
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    Debug.log(TAG + ":callListener:onError", stringeeCall != null ? stringeeCall.toString() : "null");
                     txvStatus.setText(END);
                     clear();
                 });
@@ -314,6 +338,7 @@ public class OutgoingCallActivity extends BaseActivity {
             @Override
             public void onMediaStateChange(StringeeCall stringeeCall, final StringeeCall.MediaState state) {
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    Debug.log(TAG + ":onMediaStateChange", state != null ? state.toString() : "null");
                     mediaState = state;
                     if (mediaState == StringeeCall.MediaState.CONNECTED) {
                         if (signalingState == StringeeCall.SignalingState.ANSWERED) {
@@ -333,6 +358,7 @@ public class OutgoingCallActivity extends BaseActivity {
             @Override
             public void onLocalStream(final StringeeCall stringeeCall) {
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    Debug.log(TAG + ":onLocalStream", stringeeCall != null ? stringeeCall.toString() : "null");
                     if (stringeeCall.isVideoCall()) {
                         layoutLocal.removeAllViews();
                         layoutLocal.addView(stringeeCall.getLocalView());
@@ -377,22 +403,60 @@ public class OutgoingCallActivity extends BaseActivity {
         });
 
         String times;
+        LocalDateTime endTime = null;
         if (startTime != null) {
-            LocalDateTime endTime = LocalDateTime.now();
-            times = Duration.between(startTime, endTime).getSeconds() + " giây";
-        } else {
-            times = 0 + " giây";
+            endTime = LocalDateTime.now();
+//            times = Duration.between(startTime, endTime).getSeconds() + " giây";
         }
+//            times = 0 + " giây";
 
-        conversationWrapper.getConversation().setLastMessage(times);
-        conversationWrapper.getConversation().setLastUpdated(new Date());
 
-        Message message = new Message(id,
-                isVideoCall ? Conversation.Type.VIDEO_CALL.label : Conversation.Type.CALL.label,
-                times,
-                new Date());
+        Debug.log("startCall", startTime != null ? startTime.toString() : "null");
+        Debug.log("endCall", endTime != null ? endTime.toString() : "null");
+        String time = Common.computeCallTime(
+                startTime != null ? Date.from(startTime.toInstant(ZoneOffset.UTC)) : null,
+                endTime != null ? Date.from(endTime.toInstant(ZoneOffset.UTC)) : null,
+                this
+        );
+        Debug.log("timeCall", time);
+        Date dateSend = new Date();
+        Message message = new Message(CipherUtils.Hash.sha256(id.substring(1)),
+                isVideo ? Conversation.Type.VIDEO_CALL.label : Conversation.Type.CALL.label,
+                time,
+                dateSend);
+        if(conversationWrapper != null) {
+            conversationWrapper.getConversation().setTypeMessage(isVideo ? Conversation.Type.VIDEO_CALL.label : Conversation.Type.CALL.label);
+            conversationWrapper.getConversation().setLastSender(CipherUtils.Hash.sha256(id.substring(1)));
+            conversationWrapper.getConversation().setLastMessage(time);
+            conversationWrapper.getConversation().setLastUpdated(dateSend);
+            viewModel.sendCallMessage(conversationWrapper, message);
+        } else {
+            Conversation newConversation = Conversation.TEXT;
+            newConversation.setLastMessage(time);
+            newConversation.setLastSender(CipherUtils.Hash.sha256(id.substring(1)));
+            newConversation.setLastUpdated(new Date());
+            newConversation.setCreatedAt(new Date());
+            newConversation.setUserJoined(new ArrayList<String>(){{
+                add(CipherUtils.Hash.sha256(id.substring(1)));
+                if(contactWrapInfo != null && contactWrapInfo.getUser() != null && contactWrapInfo.getUser().getPhoneNumber() != null) {
+                    add(CipherUtils.Hash.sha256(contactWrapInfo.getUser().getPhoneNumber()));
+                } else {
+                    add(CipherUtils.Hash.sha256(userTo.substring(1)));
+                }
+            }});
 
-        ((OutgoingCallViewModel) viewModel).sendCallMessage(conversationWrapper, message);
+            final ConversationWrapper conversationWrapper = new ConversationWrapper(null, newConversation);
+            viewModel.sendCallMessage(conversationWrapper, message);
+        }
+//        conversationWrapper.getConversation().setLastMessage(times);
+//        conversationWrapper.getConversation().setLastUpdated(new Date());
+//
+//        Message message = new Message(id,
+//                isVideoCall ? Conversation.Type.VIDEO_CALL.label : Conversation.Type.CALL.label,
+//                times,
+//                new Date());
+//
+//        ((OutgoingCallViewModel) viewModel).sendCallMessage(conversationWrapper, message);
         clear();
     }
 
@@ -414,7 +478,7 @@ public class OutgoingCallActivity extends BaseActivity {
     }
 
     public void subscribeObserver() {
-        ((OutgoingCallViewModel) viewModel).getUser().observe(this, user -> {
+        viewModel.getUser().observe(this, user -> {
             if (user.getAvatarImageUrl() != null) {
                 Picasso.get().load(user.getAvatarImageUrl()).into(imvAvatar);
             } else {
@@ -427,5 +491,16 @@ public class OutgoingCallActivity extends BaseActivity {
                 txvUser.setText(userTo.substring(1));
             }
         });
+    }
+
+    @Override
+    public void notifySendCallMessageSuccess(ConversationWrapper conversationWrapper) {
+        if(conversationWrapper != null) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("conversation", conversationWrapper);
+            Intent broadcast = new Intent(SEND_CALL_MESSAGE_SUCCESS)
+                    .putExtras(bundle);
+            LocalBroadcastManager.getInstance(BaseApplication.getInstance()).sendBroadcast(broadcast);
+        }
     }
 }
