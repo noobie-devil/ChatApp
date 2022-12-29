@@ -173,8 +173,8 @@ public class EnterPhoneNumberView extends BaseFragment {
                 .setNegativeButton(getResources().getString(R.string.cancel_text), (dialog, which) -> dialog.dismiss())
                 .setPositiveButton(getResources().getString(R.string.confirm_text), (dialog, which) -> {
                     dialog.dismiss();
-                    phoneNumberInputEditText.setEnabled(false);
-                    ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(false);
+//                    phoneNumberInputEditText.setEnabled(false);
+//                    ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(false);
                     ((EnterPhoneNumberViewModel) viewModel).checkExistedPhoneNumber(phoneNumberInput);
                 }).show();
     }

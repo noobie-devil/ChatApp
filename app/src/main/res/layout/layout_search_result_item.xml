@@ -102,7 +102,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/add_friend_text"
+                android:visibility="gone"
                 android:textColor="@color/white"/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txv_in_friend_relationship"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đã là bạn"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/_12ssp"
+                android:visibility="visible"
+                />
         </LinearLayout>
 
 

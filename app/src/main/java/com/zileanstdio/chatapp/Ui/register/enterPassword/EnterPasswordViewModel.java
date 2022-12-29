@@ -199,6 +199,9 @@ public class EnterPasswordViewModel extends ViewModel {
         return onUpdateRegisterInfo;
     }
 
+    public CompositeDisposable getDisposable() {
+        return disposable;
+    }
 
     @Override
     protected void onCleared() {

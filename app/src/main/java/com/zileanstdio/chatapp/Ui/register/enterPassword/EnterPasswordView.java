@@ -1,10 +1,10 @@
 package com.zileanstdio.chatapp.Ui.register.enterPassword;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
@@ -19,20 +19,19 @@ import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.zileanstdio.chatapp.Base.BaseFragment;
 import com.zileanstdio.chatapp.Data.model.User;
 import com.zileanstdio.chatapp.R;
+import com.zileanstdio.chatapp.Ui.auth.AuthActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterActivity;
 import com.zileanstdio.chatapp.Ui.register.RegisterViewModel;
 import com.zileanstdio.chatapp.Utils.Debug;
 
 import java.util.Objects;
 
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
-public class EnterPasswordView extends BaseFragment {
+public class EnterPasswordView extends BaseFragment<EnterPasswordViewModel> {
 
     private TextInputLayout textInputPassword;
     private User user;
-    private final CompositeDisposable disposable = new CompositeDisposable();
 
     public EnterPasswordView() {
         // Required empty public constructor
@@ -43,7 +42,7 @@ public class EnterPasswordView extends BaseFragment {
     }
 
     @Override
-    public ViewModel getViewModel() {
+    public EnterPasswordViewModel getViewModel() {
         if(viewModel != null) {
             return viewModel;
         }
@@ -85,12 +84,12 @@ public class EnterPasswordView extends BaseFragment {
 
         EditText passwordEditText = textInputPassword.getEditText();
         if(passwordEditText != null) {
-            disposable.add(RxTextView.textChanges(passwordEditText)
+            viewModel.getDisposable().add(RxTextView.textChanges(passwordEditText)
                     .map(inputText -> validatePassword(inputText.toString().trim()))
                     .distinctUntilChanged()
                     .subscribe(isValid -> ((RegisterActivity) baseActivity).getNextActionBtn().setEnabled(isValid)));
 
-            disposable.add(RxView.clicks(((RegisterActivity) baseActivity).getNextActionBtn())
+            viewModel.getDisposable().add(RxView.clicks(((RegisterActivity) baseActivity).getNextActionBtn())
                     .subscribe(unit -> ((EnterPasswordViewModel) viewModel).createWithEmailPasswordAuthCredential(user.getPhoneNumber(), passwordEditText.getText().toString())));
         }
 
@@ -117,7 +116,7 @@ public class EnterPasswordView extends BaseFragment {
     }
 
     private void subscribeObservers() {
-        ((EnterPasswordViewModel) viewModel).observeCreateWithEmailPassword()
+        viewModel.observeCreateWithEmailPassword()
                 .observe(this, stateResource -> {
                     if(stateResource != null) {
                         switch (stateResource.status) {
@@ -125,7 +124,8 @@ public class EnterPasswordView extends BaseFragment {
                                 baseActivity.showLoadingDialog();
                                 break;
                             case SUCCESS:
-                                ((EnterPasswordViewModel) viewModel).updateRegisterInfo(user);                                break;
+                                viewModel.updateRegisterInfo(user);
+                                break;
                             case ERROR:
                                 baseActivity.closeLoadingDialog();
                                 showSnackBar(stateResource.message, Snackbar.LENGTH_LONG);
@@ -134,7 +134,7 @@ public class EnterPasswordView extends BaseFragment {
                     }
                 });
 
-        ((EnterPasswordViewModel) viewModel).observeUpdateRegisterInfo()
+        viewModel.observeUpdateRegisterInfo()
                 .observe(this, stateResource -> {
                     if(stateResource != null) {
                         switch (stateResource.status) {
@@ -143,7 +143,9 @@ public class EnterPasswordView extends BaseFragment {
                                 break;
                             case SUCCESS:
                                 baseActivity.closeLoadingDialog();
-                                
+                                Intent intent = new Intent(baseActivity, AuthActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
                                 showSnackBar("Registered successfully", Snackbar.LENGTH_LONG);
                                 break;
                             case ERROR:
@@ -155,15 +157,4 @@ public class EnterPasswordView extends BaseFragment {
                 });
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        disposable.clear();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        disposable.dispose();
-    }
 }

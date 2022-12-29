@@ -58,16 +58,44 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         User user = users.get(position);
         if(viewModel.getContactHashMap().size() > 0 && viewModel.getContactHashMap().containsKey(user.getPhoneNumber())) {
             Contact contact = viewModel.getContactHashMap().get(user.getPhoneNumber());
-            if(contact.getRelationship() == 1) {
-                holder.btnAddFriend.setText("Đã là bạn");
-                holder.btnAddFriend.setEnabled(false);
-            } else if(contact.getRelationship() == -1){
-                holder.btnAddFriend.setText("Đã gửi kết bạn");
-                holder.btnAddFriend.setEnabled(false);
-            } else {
-                holder.btnAddFriend.setText("Kết bạn");
-                holder.btnAddFriend.setEnabled(true);
+            switch (contact.getRelationship()) {
+                case 1:
+                    holder.txvIsFriend.setText("Đã là bạn");
+                    holder.txvIsFriend.setVisibility(View.VISIBLE);
+                    holder.btnAddFriend.setVisibility(View.GONE);
+                    break;
+                case -1:
+                    holder.txvIsFriend.setText("");
+                    holder.txvIsFriend.setVisibility(View.VISIBLE);
+                    holder.btnAddFriend.setEnabled(false);
+                    holder.btnAddFriend.setText("Đã gửi");
+                    holder.btnAddFriend.setVisibility(View.VISIBLE);
+                    break;
+                case 0:
+                    holder.txvIsFriend.setText("Đang chờ kết bạn");
+                    holder.txvIsFriend.setVisibility(View.VISIBLE);
+                    holder.btnAddFriend.setVisibility(View.GONE);
+                    break;
+                default:
+                    holder.txvIsFriend.setText("");
+                    holder.txvIsFriend.setVisibility(View.GONE);
+                    holder.btnAddFriend.setEnabled(true);
+                    holder.btnAddFriend.setText("Kết bạn");
+                    holder.btnAddFriend.setVisibility(View.VISIBLE);
+                    break;
             }
+//            if(contact.getRelationship() == 1) {
+//                holder.btnAddFriend.setText("Đã là bạn");
+//                holder.btnAddFriend.setEnabled(false);
+//            } else if(contact.getRelationship() == -1){
+//                holder.txvIsFriend.setVisibility(View.GONE);
+//                holder.txvIsFriend.setText("");
+//                holder.btnAddFriend.setText("Đã gửi");
+//                holder.btnAddFriend.setEnabled(false);
+//            } else {
+//                holder.btnAddFriend.setText("Kết bạn");
+//                holder.btnAddFriend.setEnabled(true);
+//            }
         }
         if ((user.getAvatarImageUrl() != null) && !user.getAvatarImageUrl().isEmpty()) {
             Glide.with(context)
@@ -101,6 +129,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         public MaterialTextView txvName;
         public MaterialTextView txvPhoneNumber;
         public MaterialButton btnAddFriend;
+        public MaterialTextView txvIsFriend;
 
         public SearchViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -108,6 +137,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             txvName = itemView.findViewById(R.id.txv_name);
             txvPhoneNumber = itemView.findViewById(R.id.txv_phone);
             btnAddFriend = itemView.findViewById(R.id.btn_add_friend);
+            txvIsFriend = itemView.findViewById(R.id.txv_in_friend_relationship);
         }
     }
 }
